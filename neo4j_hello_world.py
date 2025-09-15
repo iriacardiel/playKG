@@ -1,8 +1,12 @@
 from neo4j import GraphDatabase
+import os
+from dotenv import load_dotenv  # pip install python-dotenv
+load_dotenv()  # Load local environment variables
 
 # Connection details
-URI = "bolt://localhost:7687"
-AUTH = ("neo4j", "test1234")
+URI = "bolt://localhost:" + os.environ.get("URI_PORT")
+AUTH = (os.environ.get("NEO4J_USER"), os.environ.get("NEO4J_PASSWORD"))
+print(f"Connecting to Neo4j at {URI} with user {AUTH[0]} and password {AUTH[1]}")
 
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
@@ -24,7 +28,17 @@ def query_data(tx):
         print(record["n"])
 
 with driver.session() as session:
-    #session.execute_write(create_data)
+    session.execute_write(create_data)
     session.execute_read(query_data)
+    
+    # Optional cleanup: wipe all data in the DB (use with care!)
+    wipe = True  # set True to delete everything
+    if wipe:
+        with driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n")
+        print("Database cleared.")
+    else:
+        print("Cleanup skipped.")
+
 
 driver.close()

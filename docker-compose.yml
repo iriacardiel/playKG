@@ -1,14 +1,12 @@
-version: '3.9'
-
 services:
   neo4j:
     image: neo4j:5.23-community
     container_name: neo4j
     ports:
-      - "7474:7474"   # Browser
-      - "7687:7687"   # Bolt protocol
+      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser
+      - "${URI_PORT}:${URI_PORT}"   # Bolt protocol
     environment:
-      - NEO4J_AUTH=neo4j/test1234   # user/pass
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}   # user/pass
     volumes:
       - neo4j_data:/data
 
