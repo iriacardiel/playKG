@@ -23,8 +23,14 @@ uv sync
 
 Run Jupyter notebook `neo4j_playground.ipynb`. 
 
-All Cypher queries are stored in `queries.yaml` file, and the notebook loads them automatically.
-The use case demonstrates how to **create nodes** and **relationships**, **query** the graph, and **clean** up the database.
+All Cypher queries are stored in `queries.yaml` file, and the notebook loads them automatically to execute the following steps:
+
+0. Create a graph database different from the default `neo4j` (requires Neo4j Enterprise Edition).
+1. Create constraints to avoid duplicate nodes.
+2. Populate the graph with sample data.
+3. Query the graph to find people and their relationships.
+4. Optionally, clean up the graph.
+
 
 **Optional but recommended: Neo4j Desktop**
 

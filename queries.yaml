@@ -35,3 +35,11 @@ match_adjacency : |
     ORDER BY person
 
 delete_all : "MATCH (n) DETACH DELETE n"
+
+constraints:
+  - |
+    CREATE CONSTRAINT person_name_unique IF NOT EXISTS
+    FOR (p:Person) REQUIRE p.name IS UNIQUE
+  - |
+    CREATE CONSTRAINT company_name_unique IF NOT EXISTS
+    FOR (c:Company) REQUIRE c.name IS UNIQUE
