@@ -1,17 +1,16 @@
-# playKG: Neo4j Hello World (WSL + Docker + Python)
-A playground to understand Knowledge Graphs.
+# playKG: Neo4j Hello World
 
-# Summary
+Hi! This is a playground to understand Knowledge Graphs. This project demonstrates how to set up a simple Neo4j database using Docker, and interact with it using Python. It includes examples of creating nodes and relationships, as well as querying the graph.
 
-This project demonstrates how to set up a simple Neo4j database using Docker, and interact with it using Python. It includes examples of creating nodes and relationships, as well as querying the graph.
+# Setup
 
-### Setup
-1. Start Neo4j:
+## 1. Start Neo4j:
 
 ```bash
-   docker compose up -d
+docker compose up -d
 ```
-2. Install Python deps
+
+## 2. Install Python deps
 
 ```bash
 python -m venv .venv
@@ -20,16 +19,24 @@ pip install uv
 uv sync
 ```
 
-# Testing the setup
+## 3. Testing the setup
 
-**Option 1**: Run Python script to test trough terminal
+Run Jupyter notebook `neo4j_playground.ipynb`. 
 
-```bash
-python neo4j_hello_world.py
-``` 
+All Cypher queries are stored in `queries.yaml` file, and the notebook loads them automatically.
+The use case demonstrates how to **create nodes** and **relationships**, **query** the graph, and **clean** up the database.
 
-**Option 2**: Run the Jupyter notebook `neo4j_hello_world.ipynb` to see examples of creating and querying data in Neo4j.
+**Optional but recommended: Neo4j Desktop**
 
-**Option 3**: Open Neo4j browser at http://localhost:${HTTP_PORT} and login with the credentials in the `.env` file.
+Interactively run Cypher queries. Open Neo4j browser at `http://localhost:${HTTP_PORT}` and login with the credentials in the `.env` file.
+
+![alt text](media/neo4j_desktop_screenshot.png)
+
+# Learning Resources
+
+- [Neo4j Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/5/all/)
 
 
+# KG RAG Notes
+
+![alt text](media/KGRAG_Schema.png)

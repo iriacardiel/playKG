@@ -1,0 +1,31 @@
+create_seed : |
+    CREATE (a:Person {name:'Iria', age:27, education:'Physics'})
+    CREATE (b:Person {name:'Guillermo', age:26, education:'Industrial Engineering'})
+    CREATE (c:Person {name:'Gabriela', age:26, education:'Physics'})
+    CREATE (d:Person {name:'Paula', age:25, education:'Computer Engineering'})
+    CREATE (e:Person {name:'Cristina', age:27, education:'Physics'})
+    CREATE (indra:Company {name:'Indra', industry:'Engineering'})
+    CREATE (ciemat:Company {name:'CIEMAT', industry:'Scientific Research'})
+    CREATE (cbm:Company {name:'CBM', industry:'Scientific Research'})
+    CREATE (a)-[:KNOWS]->(b)
+    CREATE (a)-[:KNOWS]->(c)
+    CREATE (a)-[:KNOWS]->(d)
+    CREATE (a)-[:KNOWS]->(e)
+    CREATE (b)-[:KNOWS]->(d)
+    CREATE (c)-[:KNOWS]->(e)
+    CREATE (a)-[:WORKS_AT {since:2025}]->(indra)
+    CREATE (b)-[:WORKS_AT {since:2023}]->(indra)
+    CREATE (c)-[:WORKS_AT {since:2023}]->(ciemat)
+    CREATE (d)-[:WORKS_AT {since:2024}]->(indra)
+    CREATE (e)-[:WORKS_AT {since:2025}]->(cbm)
+    
+match_person : "MATCH (p:Person) RETURN p.name, p.age as age ORDER BY age"
+
+match_company : "MATCH (c:Company) RETURN c.name as name, c.industry as industry ORDER BY industry"
+
+match_adjacency : |
+    MATCH (a:Person)-[:KNOWS]-(b:Person)
+    RETURN a.name AS src, collect(b.name) AS neighbors
+    ORDER BY src
+
+delete_all : "MATCH (n) DETACH DELETE n"
