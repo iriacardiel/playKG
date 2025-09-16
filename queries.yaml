@@ -19,13 +19,19 @@ create_seed : |
     CREATE (d)-[:WORKS_AT {since:2024}]->(indra)
     CREATE (e)-[:WORKS_AT {since:2025}]->(cbm)
     
-match_person : "MATCH (p:Person) RETURN p.name, p.age as age ORDER BY age"
+match_person : |
+    MATCH (p:Person) 
+    RETURN p.name as name, p.age as age, p.education as education
+    ORDER BY age
 
-match_company : "MATCH (c:Company) RETURN c.name as name, c.industry as industry ORDER BY industry"
+match_company : |
+    MATCH (c:Company) 
+    RETURN c.name as company_name, c.industry as industry
+    ORDER BY industry
 
 match_adjacency : |
-    MATCH (a:Person)-[:KNOWS]-(b:Person)
-    RETURN a.name AS src, collect(b.name) AS neighbors
-    ORDER BY src
+    MATCH (a:Person)-[:KNOWS]-(b:Person), (a)-[:WORKS_AT]->(c:Company)
+    RETURN a.name AS person, collect(b.name) AS knows, c.name AS works_at
+    ORDER BY person
 
 delete_all : "MATCH (n) DETACH DELETE n"
