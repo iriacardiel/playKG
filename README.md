@@ -38,11 +38,13 @@ Interactively run Cypher queries. Open Neo4j browser at `http://localhost:${HTTP
 
 ![alt text](media/neo4j_desktop_screenshot.png)
 
+
+# KG RAG Schema
+
+![alt text](media/KGRAG_schema.svg)
+
 # Learning Resources
 
 - [Neo4j Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/5/all/)
 
 
-# KG RAG Notes
-
-![alt text](media/KGRAG_Schema.png)
