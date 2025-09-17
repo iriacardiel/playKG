@@ -21,12 +21,12 @@ create_seed : |
     CREATE (indra:Company {name:'Indra', industry:'Engineering', uuid:randomUUID()})
     CREATE (ciemat:Company {name:'CIEMAT', industry:'Scientific Research', uuid:randomUUID()})
     CREATE (cbm:Company {name:'CBM', industry:'Scientific Research', uuid:randomUUID()})
-    CREATE (a)-[:KNOWS]->(b)
-    CREATE (a)-[:KNOWS]->(c)
-    CREATE (a)-[:KNOWS]->(d)
-    CREATE (a)-[:KNOWS]->(e)
-    CREATE (b)-[:KNOWS]->(d)
-    CREATE (c)-[:KNOWS]->(e)
+    CREATE (a)-[:KNOWS {knows_from:'work'}]->(b)
+    CREATE (a)-[:KNOWS {knows_from:'university'}]->(c)
+    CREATE (a)-[:KNOWS {knows_from:'work'}]->(d)
+    CREATE (a)-[:KNOWS {knows_from:'university'}]->(e)
+    CREATE (b)-[:KNOWS {knows_from:'work'}]->(d)
+    CREATE (c)-[:KNOWS {knows_from:'university'}]->(e)
     CREATE (a)-[:WORKS_AT {since:2025}]->(indra)
     CREATE (b)-[:WORKS_AT {since:2023}]->(indra)
     CREATE (c)-[:WORKS_AT {since:2023}]->(ciemat)
@@ -78,4 +78,21 @@ add_descriptions :
         SET c.company_info = c.name + " operates in the " + c.industry + " industry." + "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology."
 
 
-delete_all : "MATCH (n) DETACH DELETE n"
+create_vector_indexes:
+    - |
+        CREATE VECTOR INDEX person_info_idx IF NOT EXISTS
+        FOR (n:Person) ON (n.person_info_emb)
+        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
+    - |
+        CREATE VECTOR INDEX company_info_idx IF NOT EXISTS
+        FOR (n:Company) ON (n.company_info_emb)
+        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
+
+delete_all : 
+
+    - |
+        MATCH (n) DETACH DELETE n
+    - |
+        DROP INDEX person_info_idx IF EXISTS
+    - |
+        DROP INDEX company_info_idx IF EXISTS
