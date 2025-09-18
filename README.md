@@ -24,7 +24,7 @@ The project implements the **semantic retrieval** component of a KG RAG pipeline
 2. **Vector Index Creation**
    - Create vector indexes for Person and Company nodes
    - Use 768-dimensional embeddings with cosine similarity
-   - Index properties: `person_info_emb` and `company_info_emb`
+   - Index properties: `info_emb`
 
 3. **Embedding Generation**
    - Generate embeddings for entity descriptions using Ollama
