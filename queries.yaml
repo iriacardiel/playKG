@@ -13,11 +13,11 @@ constraints:
     FOR (c:Company) REQUIRE c.name IS UNIQUE
 
 create_seed : |
-    CREATE (a:Person {name:'Iria', age:27, education:'Physics', uuid:randomUUID()})
-    CREATE (b:Person {name:'Guillermo', age:26, education:'Industrial Engineering', uuid:randomUUID()})
-    CREATE (c:Person {name:'Gabriela', age:26, education:'Physics', uuid:randomUUID()})
-    CREATE (d:Person {name:'Paula', age:25, education:'Computer Engineering', uuid:randomUUID()})
-    CREATE (e:Person {name:'Cristina', age:27, education:'Physics', uuid:randomUUID()})
+    CREATE (a:Person {name:'Iria', age:27, gender: 'female', education:'Physics', uuid:randomUUID()})
+    CREATE (b:Person {name:'Guillermo', age:26, gender: 'male', education:'Industrial Engineering', uuid:randomUUID()})
+    CREATE (c:Person {name:'Gabriela', age:26, gender: 'female',education:'Physics', uuid:randomUUID()})
+    CREATE (d:Person {name:'Paula', age:25, gender: 'female', education:'Computer Engineering', uuid:randomUUID()})
+    CREATE (e:Person {name:'Cristina', age:27, gender: 'female', education:'Physics', uuid:randomUUID()})
     CREATE (indra:Company {name:'Indra', industry:'Engineering', uuid:randomUUID()})
     CREATE (ciemat:Company {name:'CIEMAT', industry:'Scientific Research', uuid:randomUUID()})
     CREATE (cbm:Company {name:'CBM', industry:'Scientific Research', uuid:randomUUID()})
@@ -35,7 +35,7 @@ create_seed : |
     
 show_people : |
     MATCH (p:Person) 
-    RETURN p.name as name, p.age as age, p.education as education
+    RETURN p.name as name, p.age as age, p.gender, p.education as education
     ORDER BY age
 
 show_companies : |
@@ -56,19 +56,19 @@ add_info :
 
     - |
         MATCH (p:Person {name:"Iria"})
-        SET p.info = p.name + " is " + toString(p.age) + " years old and studied " + p.education + "." + "Iria has blue eyes and long brunette and wavy hair. She likes to paint her nails in red or purple colours. She usually wears long earrings."
+        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Iria has blue eyes and long brunette and wavy hair. She likes to paint her nails in red or purple colours. She usually wears long earrings."
     - |
         MATCH (p:Person {name:"Guillermo"})
-        SET p.info = p.name + " is " + toString(p.age) + " years old and studied " + p.education + "." + "Guillermo has brown eyes and short hair. He has a very fancy shirt that he takes to all important events. He shaved his head this summer."
+        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Guillermo has brown eyes and short hair. He has a very fancy shirt that he takes to all important events. He shaved his head this summer."
     - |
         MATCH (p:Person {name:"Gabriela"})
-        SET p.info = p.name + " is " + toString(p.age) + " years old and studied " + p.education + "." + "Gabriela has long curly hair with babylights. She's petite and likes to wear hippie-style clothes."
+        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Gabriela has long curly hair with babylights. She's petite and likes to wear hippie-style clothes."
     - |
         MATCH (p:Person {name:"Paula"})
-        SET p.info = p.name + " is " + toString(p.age) + " years old and studied " + p.education + "." + "Paula short hair in a wolfcut style. She wears long and wide pants and sneakers to the laboratory."
+        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Paula short hair in a wolfcut style. She wears long and wide pants and sneakers to the laboratory."
     - |
         MATCH (p:Person {name:"Cristina"})
-        SET p.info = p.name + " is " + toString(p.age) + " years old and studied " + p.education + "." + "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts. "
+        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts. "
     
     - |
         MATCH (c:Company {name:"Indra"})
