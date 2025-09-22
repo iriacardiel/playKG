@@ -24,7 +24,7 @@ The project implements the **semantic retrieval** component of a KG RAG pipeline
 2. **Vector Index Creation**
    - Create vector indexes for Person and Company nodes
    - Use 768-dimensional embeddings with cosine similarity
-   - Index properties: `info_emb`
+   - Index properties: `embedding`
 
 3. **Embedding Generation**
    - Generate embeddings for entity descriptions using Ollama
@@ -90,9 +90,9 @@ uv sync
 
 ### 3. Testing the setup
 
-Run Jupyter notebook `neo4j_playground.ipynb`. 
+Run Jupyter notebook `neo4j_playground_friends.ipynb`. 
 
-All Cypher queries are stored in `queries.yaml` file, and the notebook loads them automatically to execute the following steps:
+All Cypher queries are stored in `queries_friends.yaml` file, and the notebook loads them automatically to execute the following steps:
 
 0. Create a graph database different from the default `neo4j` (requires Neo4j Enterprise Edition).
 1. Create constraints to avoid duplicate nodes.

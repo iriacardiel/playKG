@@ -83,16 +83,16 @@ add_info :
 create_vector_indexes:
     - |
         CREATE VECTOR INDEX person_node_info_idx IF NOT EXISTS
-        FOR (n:Person) ON (n.info_emb)
+        FOR (n:Person) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
     - |
         CREATE VECTOR INDEX company_node_info_idx IF NOT EXISTS
-        FOR (n:Company) ON (n.info_emb)
+        FOR (n:Company) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
     - |
         CREATE VECTOR INDEX knows_relationship_info_idx IF NOT EXISTS
-        FOR ()-[r:KNOWS]-() ON (r.info_emb)
+        FOR ()-[r:KNOWS]-() ON (r.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
 delete_all : 

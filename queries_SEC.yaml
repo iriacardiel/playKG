@@ -1,0 +1,31 @@
+constraints:
+  - |
+    CREATE CONSTRAINT unique_chunk IF NOT EXISTS 
+    FOR (c:Chunk) REQUIRE c.uuid IS UNIQUE
+  
+create_chunks : |
+    MERGE(c:Chunk {uuid: $chunkParamDict.uuid})
+    ON CREATE SET 
+        c.names = $chunkParamDict.names,
+        c.formId = $chunkParamDict.formId, 
+        c.cik = $chunkParamDict.cik, 
+        c.cusip6 = $chunkParamDict.cusip6, 
+        c.source = $chunkParamDict.source, 
+        c.f10kItem = $chunkParamDict.f10kItem, 
+        c.chunkSeqId = $chunkParamDict.chunkSeqId, 
+        c.text = $chunkParamDict.text
+    RETURN c
+    
+
+create_vector_indexes:
+    - |
+        CREATE VECTOR INDEX `form_10k_chunks` IF NOT EXISTS
+        FOR (c:Chunk) ON (c.embedding) 
+        OPTIONS { indexConfig: {`vector.dimensions`: 768, `vector.similarity_function`: 'cosine'}}
+        
+delete_all : 
+
+    - |
+        MATCH (n) DETACH DELETE n
+    - |
+        DROP INDEX form_10k_chunks IF EXISTS
