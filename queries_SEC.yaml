@@ -19,7 +19,7 @@ create_chunks : |
 
 create_vector_indexes:
     - |
-        CREATE VECTOR INDEX `form_10k_chunks` IF NOT EXISTS
+        CREATE VECTOR INDEX `chunks_node_text_idx` IF NOT EXISTS
         FOR (c:Chunk) ON (c.embedding) 
         OPTIONS { indexConfig: {`vector.dimensions`: 768, `vector.similarity_function`: 'cosine'}}
         
@@ -28,4 +28,4 @@ delete_all :
     - |
         MATCH (n) DETACH DELETE n
     - |
-        DROP INDEX form_10k_chunks IF EXISTS
+        DROP INDEX chunks_node_text_idx IF EXISTS

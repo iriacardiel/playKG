@@ -21,12 +21,12 @@ create_seed : |
     CREATE (indra:Company {name:'Indra', industry:'Engineering', uuid:randomUUID()})
     CREATE (ciemat:Company {name:'CIEMAT', industry:'Scientific Research', uuid:randomUUID()})
     CREATE (cbm:Company {name:'CBM', industry:'Scientific Research', uuid:randomUUID()})
-    CREATE (a)-[:KNOWS {knows_from:'work', info: 'Guillermo and Iria work together in the same project with AI Agents.', uuid:randomUUID()}]->(b)
-    CREATE (a)-[:KNOWS {knows_from:'university', info: 'Iria and Gabriela now each other because they went to University together and liked going camping.', uuid:randomUUID() }]->(c)
-    CREATE (a)-[:KNOWS {knows_from:'work', info: 'Paula is helping Iria with the project she is working on.', uuid:randomUUID()}]->(d)
-    CREATE (a)-[:KNOWS {knows_from:'university', info: 'Cristina was Iria best friend in University, now they see each other every weekend.', uuid:randomUUID()}]->(e)
-    CREATE (b)-[:KNOWS {knows_from:'work', info: 'Paula is helping Guillermo with the project he is working on.', uuid:randomUUID()}]->(d)
-    CREATE (c)-[:KNOWS {knows_from:'university', info: 'Cristina and Gabriela go to Chinese academy together, although they met at uni.', uuid:randomUUID()}]->(e)
+    CREATE (a)-[:KNOWS {knows_from:'work', text: 'Guillermo and Iria work together in the same project with AI Agents.', uuid:randomUUID()}]->(b)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'Iria and Gabriela now each other because they went to University together and liked going camping.', uuid:randomUUID() }]->(c)
+    CREATE (a)-[:KNOWS {knows_from:'work', text: 'Paula is helping Iria with the project she is working on.', uuid:randomUUID()}]->(d)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'Cristina was Iria best friend in University, now they see each other every weekend.', uuid:randomUUID()}]->(e)
+    CREATE (b)-[:KNOWS {knows_from:'work', text: 'Paula is helping Guillermo with the project he is working on.', uuid:randomUUID()}]->(d)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'Cristina and Gabriela go to Chinese academy together, although they met at uni.', uuid:randomUUID()}]->(e)
     CREATE (a)-[:WORKS_AT {since:2025}]->(indra)
     CREATE (b)-[:WORKS_AT {since:2023}]->(indra)
     CREATE (c)-[:WORKS_AT {since:2023}]->(ciemat)
@@ -48,50 +48,50 @@ match_adjacency : |
     RETURN a.name AS person, collect(b.name) AS knows, c.name AS works_at
     ORDER BY person
 
-show_info : |
+show_text : |
     MATCH (n) 
-    RETURN labels(n), n.name, n.info
+    RETURN labels(n), n.name, n.text
 
-add_info :
+add_text :
 
     - |
         MATCH (p:Person {name:"Iria"})
-        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Iria has blue eyes and long brunette and wavy hair. She likes to paint her nails in red or purple colours. She usually wears long earrings."
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Iria has blue eyes and long brunette and wavy hair. She likes to paint her nails in red or purple colours. She usually wears long earrings."
     - |
         MATCH (p:Person {name:"Guillermo"})
-        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Guillermo has brown eyes and short hair. He has a very fancy shirt that he takes to all important events. He shaved his head this summer."
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Guillermo has brown eyes and short hair. He has a very fancy shirt that he takes to all important events. He shaved his head this summer."
     - |
         MATCH (p:Person {name:"Gabriela"})
-        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Gabriela has long curly hair with babylights. She's petite and likes to wear hippie-style clothes."
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Gabriela has long curly hair with babylights. She's petite and likes to wear hippie-style clothes."
     - |
         MATCH (p:Person {name:"Paula"})
-        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Paula short hair in a wolfcut style. She wears long and wide pants and sneakers to the laboratory."
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Paula short hair in a wolfcut style. She wears long and wide pants and sneakers to the laboratory."
     - |
         MATCH (p:Person {name:"Cristina"})
-        SET p.info = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts. "
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts. "
     
     - |
         MATCH (c:Company {name:"Indra"})
-        SET c.info = c.name + " operates in the " + c.industry + " industry." + "Indra Group is a holding company that promotes technological progress. It includes Indra, one of the main global defense, air traffic and space companies; and Minsait, leading digital transformation and information technologies in Spain and Latin America. "
+        SET c.text = c.name + " operates in the " + c.industry + " industry." + "Indra Group is a holding company that promotes technological progress. It includes Indra, one of the main global defense, air traffic and space companies; and Minsait, leading digital transformation and information technologies in Spain and Latin America. "
     - |
         MATCH (c:Company {name:"CIEMAT"})
-        SET c.info = c.name + " operates in the " + c.industry + " industry." + "The CIEMAT (Centro de Investigaciones Energéticas, Medioambientales y Tecnológicas) is a public research organization attached to the Ministry of Science, Innovation and Universities through the General Secretariat for Research. It occupies an intermediate position in the chain that runs from the creation of basic knowledge to industrial application, so its activities always seek to serve as a bridge between R&D&I and objectives of social interest."
+        SET c.text = c.name + " operates in the " + c.industry + " industry." + "The CIEMAT (Centro de Investigaciones Energéticas, Medioambientales y Tecnológicas) is a public research organization attached to the Ministry of Science, Innovation and Universities through the General Secretariat for Research. It occupies an intermediate position in the chain that runs from the creation of basic knowledge to industrial application, so its activities always seek to serve as a bridge between R&D&I and objectives of social interest."
     - |
         MATCH (c:Company {name:"CBM"})
-        SET c.info = c.name + " operates in the " + c.industry + " industry." + "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology."
+        SET c.text = c.name + " operates in the " + c.industry + " industry." + "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology."
     
 create_vector_indexes:
     - |
-        CREATE VECTOR INDEX person_node_info_idx IF NOT EXISTS
+        CREATE VECTOR INDEX person_node_text_idx IF NOT EXISTS
         FOR (n:Person) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
     - |
-        CREATE VECTOR INDEX company_node_info_idx IF NOT EXISTS
+        CREATE VECTOR INDEX company_node_text_idx IF NOT EXISTS
         FOR (n:Company) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
     - |
-        CREATE VECTOR INDEX knows_relationship_info_idx IF NOT EXISTS
+        CREATE VECTOR INDEX knows_relationship_text_idx IF NOT EXISTS
         FOR ()-[r:KNOWS]-() ON (r.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
@@ -100,8 +100,8 @@ delete_all :
     - |
         MATCH (n) DETACH DELETE n
     - |
-        DROP INDEX person_node_info_idx IF EXISTS
+        DROP INDEX person_node_text_idx IF EXISTS
     - |
-        DROP INDEX company_node_info_idx IF EXISTS
+        DROP INDEX company_node_text_idx IF EXISTS
     - |
-        DROP INDEX knows_relationship_info_idx IF EXISTS
+        DROP INDEX knows_relationship_text_idx IF EXISTS
