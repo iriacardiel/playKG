@@ -14,7 +14,7 @@ def vectorize_property(
     element: Literal["node", "relationship"]="node",
     node_label: Optional[str]="",
     rel_type: Optional[str]="",
-    source_property: str="",
+    source_property: str=""
 ) -> None:
     """
     Generate and store vector embeddings for specified property of nodes or relationships.
@@ -128,7 +128,7 @@ def neo4j_KGRAG_search(
     index: str, 
     source_property : str,
     main_property : str,
-    top_k: int
+    top_k: int,
 ) -> Dict[str, Any]:
     """
     Perform KG RAG retrieval: vector search + context preparation for agent consumption
@@ -244,9 +244,16 @@ def neo4j_KGRAG_search(
     cprint(f"\nRunning vector search query", "green")
     raw_results = runner(vector_search_query, search_parameters)
     
-    # (4) Process results for RAG consumption
+    if isinstance(raw_results, list):
+        raw_search_results = raw_results
+    else:
+        raw_search_results = []
+        for r in raw_results:
+            raw_search_results.append(dict(r))
+        
+    # (4) Process results for RAG consumption into a combined_context for the LLM
 
-    processed_results = []
+    processed_search_results = []
     combined_context = ""
     
     for i, result in enumerate(list(raw_results)):
@@ -284,13 +291,14 @@ def neo4j_KGRAG_search(
             combined_context += f"RESULT #{i+1}: {rel_type} relationship\nSCORE: {score}\nSOURCE TEXT: {text_content}\nPROPERTIES:{properties_str}\nFACTS:{facts_str}\n{'-'*40}\n"
 
         
-        processed_results.append(processed_result)
+        processed_search_results.append(processed_result)
     
     # Return structured context for agent
-    structured_context = {
+    output = {
         "query": query,
-        "total_results": len(processed_results),
-        "search_results": processed_results,
+        "total_results": len(processed_search_results),
+        "raw_search_results" : raw_search_results,
+        "processed_search_results": processed_search_results,
         "combined_context": combined_context, # <<<<< LLM Context
         "search_metadata": {
             "element": element,
@@ -299,5 +307,5 @@ def neo4j_KGRAG_search(
             "top_k": top_k,
         }
     }
-    
-    return structured_context
+
+    return output

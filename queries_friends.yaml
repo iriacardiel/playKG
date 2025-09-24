@@ -1,16 +1,10 @@
 constraints:
   - |
-    CREATE CONSTRAINT person_uuid_unique IF NOT EXISTS
+    CREATE CONSTRAINT person_unique IF NOT EXISTS
     FOR (p:Person) REQUIRE p.uuid IS UNIQUE
   - |
-    CREATE CONSTRAINT company_uuid_unique IF NOT EXISTS
+    CREATE CONSTRAINT company_unique IF NOT EXISTS
     FOR (c:Company) REQUIRE c.uuid IS UNIQUE
-  - |
-    CREATE CONSTRAINT person_name_unique IF NOT EXISTS
-    FOR (p:Person) REQUIRE p.name IS UNIQUE
-  - |
-    CREATE CONSTRAINT name_unique IF NOT EXISTS
-    FOR (c:Company) REQUIRE c.name IS UNIQUE
 
 create_seed : |
     CREATE (a:Person {name:'Iria', age:27, gender: 'female', education:'Physics', uuid:randomUUID()})
@@ -82,16 +76,16 @@ add_text :
     
 create_vector_indexes:
     - |
-        CREATE VECTOR INDEX person_node_text_idx IF NOT EXISTS
+        CREATE VECTOR INDEX person_node_idx IF NOT EXISTS
         FOR (n:Person) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
     - |
-        CREATE VECTOR INDEX company_node_text_idx IF NOT EXISTS
+        CREATE VECTOR INDEX company_node_idx IF NOT EXISTS
         FOR (n:Company) ON (n.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
     - |
-        CREATE VECTOR INDEX knows_relationship_text_idx IF NOT EXISTS
+        CREATE VECTOR INDEX know_relationship_idx IF NOT EXISTS
         FOR ()-[r:KNOWS]-() ON (r.embedding)
         OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
 
@@ -100,8 +94,8 @@ delete_all :
     - |
         MATCH (n) DETACH DELETE n
     - |
-        DROP INDEX person_node_text_idx IF EXISTS
+        DROP INDEX person_node_idx IF EXISTS
     - |
-        DROP INDEX company_node_text_idx IF EXISTS
+        DROP INDEX company_node_idx IF EXISTS
     - |
-        DROP INDEX knows_relationship_text_idx IF EXISTS
+        DROP INDEX know_relationship_idx IF EXISTS

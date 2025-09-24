@@ -1,6 +1,6 @@
 constraints:
   - |
-    CREATE CONSTRAINT unique_chunk IF NOT EXISTS 
+    CREATE CONSTRAINT chunk_unique IF NOT EXISTS 
     FOR (c:Chunk) REQUIRE c.uuid IS UNIQUE
   
 create_chunks : |
@@ -73,7 +73,7 @@ link_section_chunk_to_form : |
 
 create_vector_indexes:
     - |
-        CREATE VECTOR INDEX `chunks_node_text_idx` IF NOT EXISTS
+        CREATE VECTOR INDEX `chunks_node_idx` IF NOT EXISTS
         FOR (c:Chunk) ON (c.embedding) 
         OPTIONS { indexConfig: {`vector.dimensions`: 768, `vector.similarity_function`: 'cosine'}}
 
@@ -112,4 +112,4 @@ delete_all :
     - |
         MATCH (n) DETACH DELETE n
     - |
-        DROP INDEX chunks_node_text_idx IF EXISTS
+        DROP INDEX chunks_node_idx IF EXISTS
