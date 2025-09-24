@@ -163,8 +163,8 @@ def neo4j_KGRAG_search(
             
             RETURN 
                 score,
-                node[$source_property] as text,
-                node {{.*, label: labels(node)}} AS properties_dict
+                labels(node) AS label,
+                node {{.*}} AS properties_dict
                 
             ORDER BY score DESC
         """
@@ -172,24 +172,23 @@ def neo4j_KGRAG_search(
         vector_search_query = f"""
             CALL db.index.vector.queryNodes($index_name, $top_k, $query_embedding)
             YIELD node, score
-            
-            WITH node, score,
+            WITH node, score, ['embedding','uuid'] as drop
+            WITH node, score, drop,
                 [(node)-[r]->(neighbour) |
                     node.name +
-                    " -[" + type(r) + coalesce(" " + apoc.convert.toJson(apoc.map.removeKeys(properties(r),  ['embedding','uuid'])), "") + "]-> " +
+                    " -[" + type(r) + " " + coalesce(apoc.convert.toJson(apoc.map.removeKeys(properties(r),  drop)), "") + "]-> " +
                     neighbour.name
                 ] +
                 [(neighbour)-[r]->(node) |
                     neighbour.name + 
-                    " -[" + type(r) + coalesce(" " + apoc.convert.toJson(apoc.map.removeKeys(properties(r),  ['embedding','uuid'])), "") + "]-> " + 
+                    " -[" + type(r) + " " + coalesce(apoc.convert.toJson(apoc.map.removeKeys(properties(r),  drop)), "") + "]-> " + 
                     node.name
                 ] AS rels
                 
             RETURN
                 score,
-                node[$source_property] AS text,
-                node {{.*, label: labels(node)}} AS properties_dict,
-                
+                labels(node) AS label,
+                apoc.map.removeKeys(node {{.*}}, drop) AS properties_dict,
                 apoc.text.join(rels, "\n") AS relations
                 
             ORDER BY score DESC
@@ -202,27 +201,26 @@ def neo4j_KGRAG_search(
             WITH r, score
             RETURN 
                 score, 
-                r[$source_property] as text,
-                r {{.*, type: type(r)}} AS properties_dict
+                type(r) as type,
+                r {{.*}} AS properties_dict
             ORDER BY score DESC
         """
         # TODO
         vector_search_query = f"""
         CALL db.index.vector.queryRelationships($index_name, $top_k, $query_embedding)
         YIELD relationship AS r, score
-        
-        WITH r, score,
+        WITH r, score, ['embedding','uuid'] as drop
+        WITH r, score, drop,
             [
             startNode(r).name +
-            " -[" + type(r) +  coalesce(" " + apoc.convert.toJson(apoc.map.removeKeys(properties(r),  ['embedding','uuid'])), "") + "]-> " + 
+            " -[" + type(r) + " " +coalesce(apoc.convert.toJson(apoc.map.removeKeys(properties(r),  drop)), "") + "]-> " + 
             endNode(r).name 
             ] AS rels
         
         RETURN
             score,
-            r[$source_property] AS text,
-            r {{.*, type: type(r)}} AS properties_dict,
-            
+            type(r) as type,
+            apoc.map.removeKeys(r {{.*}}, drop) AS properties_dict,
             apoc.text.join(rels, "\n") AS relations
         
         ORDER BY score DESC
@@ -249,24 +247,37 @@ def neo4j_KGRAG_search(
     for i, result in enumerate(list(raw_results)):
         
         result_dict = dict(result)
-        score = round(result_dict.get('score', 0.0), 3)
-        relations = result_dict.get('relations', '')
-        text_content = result_dict.get('text')
-        filtered_properties = {
-            k: v for k, v in result_dict.get('properties_dict').items()
-            if k not in {source_property, "embedding", "uuid"}
-        }
         
-        processed_result = {
-            "index": i,
-            "score": score,
-            "text": text_content,
-            "properties": filtered_properties,
-            "relations" : relations
-        }
+        score = round(result_dict.get('score', 0.0), 3)
+        node_label = result_dict.get('label','')
+        rel_type = result_dict.get('type','')
+        properties = result_dict.get('properties_dict',{})
+        text_content = properties.get(source_property,'')
+        relations = result_dict.get('relations', '')
+
+        
+        if element == "node":
+            processed_result = {
+                "index": i,
+                "score": score,
+                "node_label": node_label,
+                "properties": properties,
+                "relations" : relations
+            }
+            combined_context += f"# Top {i}: {node_label} node\n## Score: {score}\n## Source text: {text_content}\n## Relationships information: {relations}\n\n"
+
+        else:
+            processed_result = {
+                "index": i,
+                "score": score,
+                "relationship_type": rel_type,
+                "properties": properties,
+                "relations" : relations
+            }
+            combined_context += f"# Top {i}: {rel_type} relationship\n## Score: {score}\n## Source text: {text_content}\n## Relationships information: {relations}\n\n"
+
         
         processed_results.append(processed_result)
-        combined_context += f"# Top {i} {element}\n## Score: {score}\n## Source text: {text_content}\n## Relationships information: {relations}\n\n"
     
     # Return structured context for agent
     structured_context = {
