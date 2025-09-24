@@ -11,5 +11,7 @@ dependencies = [
   "neo4j",
   "langchain-neo4j",
   "ollama",
-  "requests"
+  "requests",
+  "langchain-community",
+  "langchain-ollama"
 ]
