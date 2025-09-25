@@ -46,6 +46,15 @@ show_text : |
     MATCH (n) 
     RETURN labels(n), n.name, n.text
 
+show_locations : |
+    MATCH (n) 
+    RETURN labels(n), n.name, n.location
+
+show_distances : |
+    MATCH (p:Person {name:"Iria"}), (other:Person)
+    WITH p, other, point.distance(p.location, other.location) AS distance_m
+    RETURN p.name, other.name, round(distance_m/1000, 2) + " km" AS distance_km
+
 add_text :
 
     - |
@@ -73,7 +82,36 @@ add_text :
     - |
         MATCH (c:Company {name:"CBM"})
         SET c.text = c.name + " operates in the " + c.industry + " industry." + "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology."
+
+add_locations :
+
+    - |
+        MATCH (p:Person {name:"Iria"})
+        SET p.location = point({latitude: 40.437596, longitude: -3.711223})
+    - |
+        MATCH (p:Person {name:"Guillermo"})
+        SET p.location = point({latitude: 40.455022, longitude: -3.692355})
+    - |
+        MATCH (p:Person {name:"Gabriela"})
+        SET p.location = point({latitude: 40.475721, longitude: -3.711451})
+    - |
+        MATCH (p:Person {name:"Paula"})
+        SET p.location = point({latitude: 40.490170, longitude: -3.654654})
+    - |
+        MATCH (p:Person {name:"Cristina"})
+        SET p.location = point({latitude: 40.367462, longitude: -3.597745})
     
+    - |
+        MATCH (c:Company {name:"Indra"})
+        SET c.location = point({latitude: 40.396648, longitude: -3.624635})
+    - |
+        MATCH (c:Company {name:"CIEMAT"})
+        SET c.location = point({latitude: 40.453938, longitude: -3.728925})
+    - |
+        MATCH (c:Company {name:"CBM"})
+        SET c.location = point({latitude: 40.549613, longitude: -3.690136})
+
+
 create_vector_indexes:
     - |
         CREATE VECTOR INDEX person_node_idx IF NOT EXISTS
