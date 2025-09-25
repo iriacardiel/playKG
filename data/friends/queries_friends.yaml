@@ -245,3 +245,48 @@ delete_all :
         DROP INDEX company_node_idx IF EXISTS
     - |
         DROP INDEX know_relationship_idx IF EXISTS
+
+# querys to reuse
+create_person : |
+    CREATE (p:Person {
+        name:$person_name, 
+        age:$person_age, 
+        gender: $person_gender, 
+        education:$person_education, 
+        text : $person_name + " is a " + $person_age + " of " + toString($person_gender) + " years old and studied " + $person_education + "." + $person_extra_text,
+        location : point({latitude: $person_latitude, longitude: $person_longitude}),
+        uuid:randomUUID()
+        })
+
+create_company : |
+    CREATE (c:Company {
+        name:$company_name, 
+        industry:$company_industry, 
+        text : $company_name + " operates in the " + $company_industry + " industry." + $company_extra_text,
+        location : point({latitude: $company_latitude, longitude: $company_longitude}),
+        uuid:randomUUID()
+        })
+
+create_person_company_relation: |
+    MATCH (p:Person {name: $person_name})
+    MATCH (c:Company {name: $company_name})
+    MERGE (p)-[r:WORKS_AT]->(c)
+    ON CREATE SET r.since = coalesce($since, date()), r.uuid = randomUUID()
+    RETURN p, r, c
+
+create_person_person_relation: |
+    MATCH (p1:Person {name: $start_person})
+    MATCH (p2:Person {name: $end_person})
+    MERGE (p1)-[r:KNOWS]->(p2)
+    ON CREATE SET r.knows_from = coalesce($knows_from, "unknown"), r.text = $relation_text, r.uuid = randomUUID()
+    RETURN p1, r, p2
+
+create_vector_index_nodes : |
+        CREATE VECTOR INDEX $index_name IF NOT EXISTS
+        FOR (n:$node_label) ON (n.embedding)
+        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
+        
+create_vector_index_relations : |
+        CREATE VECTOR INDEX $index_name IF NOT EXISTS
+        FOR ()-[r:$relation_type]-() ON (n.embedding)
+        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
