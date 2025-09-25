@@ -86,7 +86,7 @@ match_first_chunk_of_section: |
 
 match_second_chunk: |
     MATCH (first:Chunk)-[:NEXT]->(nextChunk:Chunk)
-      WHERE first.uuid = $chunkId
+      WHERE first.uuid = $uuid
     RETURN nextChunk.uuid as uuid, nextChunk.text as text
 
 match_several_relations : |
@@ -96,13 +96,13 @@ match_several_relations : |
 
 match_window_1: |
     MATCH (c1:Chunk)-[:NEXT]->(c2:Chunk)-[:NEXT]->(c3:Chunk) 
-        WHERE c2.uuid = $chunkId
+        WHERE c2.uuid = $uuid
     RETURN c1.uuid, c2.uuid, c3.uuid
 
 match_window_2: |
     MATCH window=
     (:Chunk)-[:NEXT*0..1]->(c:Chunk)-[:NEXT*0..1]->(:Chunk) 
-    WHERE c.uuid = $chunkId
+    WHERE c.uuid = $uuid
     WITH window as longestChunkWindow 
     ORDER BY length(longestChunkWindow) DESC
     RETURN length(longestChunkWindow) 
