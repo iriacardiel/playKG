@@ -7,7 +7,7 @@ from neo4j._sync.work.session import Session
 from langchain_neo4j import Neo4jGraph
 from termcolor import cprint
   
-from helper_ollama import create_embedding
+from . import helper_ollama
 
 def vectorize_property(
     runner: Callable[[str, Optional[Mapping[str, Any]]], Iterable],
@@ -64,7 +64,7 @@ def vectorize_property(
         
         # Generate embeddings for each record
         for record in records:
-            vec = create_embedding(input_text=record["txt"])
+            vec = helper_ollama.create_embedding(input_text=record["txt"])
             
             # Update node with embedding
             update_query = f"""
@@ -94,7 +94,7 @@ def vectorize_property(
         
         # Generate embeddings for each record
         for record in records:
-            vec = create_embedding(input_text=record["txt"])
+            vec = helper_ollama.create_embedding(input_text=record["txt"])
             
             # Update relationship with embedding
             update_query = f"""
@@ -153,7 +153,7 @@ def neo4j_KGRAG_search(
     """
     
     # (1) Generate embedding for the search query
-    query_embedding = create_embedding(query)
+    query_embedding = helper_ollama.create_embedding(query)
     
     # (2) Build default retrieval query based on element type
     if element == "node":

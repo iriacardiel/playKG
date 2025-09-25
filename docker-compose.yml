@@ -3,13 +3,24 @@ services:
     image: neo4j:5.23-community
     container_name: neo4j
     ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser
-      - "${URI_PORT}:${URI_PORT}"   # Bolt protocol
+      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser (e.g. 7474:7474)
+      - "${URI_PORT}:${URI_PORT}"     # Bolt (e.g. 7687:7687)
     environment:
-      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}   # user/pass
-      - NEO4J_PLUGINS=["apoc"]  # install APOC plugin
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
     volumes:
       - neo4j_data:/data
+
+  neodash:
+    image: neo4jlabs/neodash:latest
+    container_name: neodash
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser (e.g. 5005:5005)
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - neo4j
 
 volumes:
   neo4j_data:

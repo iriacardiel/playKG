@@ -92,7 +92,7 @@ uv sync
 
 Run Jupyter notebook `neo4j_playground_friends.ipynb`. 
 
-All Cypher queries are stored in `queries_friends.yaml` file, and the notebook loads them automatically to execute the following steps:
+All Cypher queries are stored in `data/friends/queries_friends.yaml` file, and the notebook loads them automatically to execute the following steps:
 
 0. Create a graph database different from the default `neo4j` (requires Neo4j Enterprise Edition).
 1. Create constraints to avoid duplicate nodes.

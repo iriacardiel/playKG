@@ -12,20 +12,66 @@ create_seed : |
     CREATE (c:Person {name:'Gabriela', age:26, gender: 'female',education:'Physics', uuid:randomUUID()})
     CREATE (d:Person {name:'Paula', age:25, gender: 'female', education:'Computer Engineering', uuid:randomUUID()})
     CREATE (e:Person {name:'Cristina', age:27, gender: 'female', education:'Physics', uuid:randomUUID()})
+    CREATE (f:Person {name:'Daniel', age:27, gender: 'male', education:'Arts', uuid:randomUUID()})
+    CREATE (g:Person {name:'Javier', age:27, gender: 'male', education:'Physics', uuid:randomUUID()})
+    CREATE (h:Person {name:'Juan', age:27, gender: 'male', education:'Physics', uuid:randomUUID()})
+    CREATE (i:Person {name:'Elias', age:29, gender: 'male', education:'Physics', uuid:randomUUID()})
+    CREATE (j:Person {name:'Iciar', age:26, gender: 'female', education:'Physics', uuid:randomUUID()})
+    CREATE (k:Person {name:'Adrián', age:27, gender: 'male', education:'Physics', uuid:randomUUID()})
+
     CREATE (indra:Company {name:'Indra', industry:'Engineering', uuid:randomUUID()})
     CREATE (ciemat:Company {name:'CIEMAT', industry:'Scientific Research', uuid:randomUUID()})
     CREATE (cbm:Company {name:'CBM', industry:'Scientific Research', uuid:randomUUID()})
+    CREATE (instagram:Company {name:'Instagram', industry:'Social Media', uuid:randomUUID()})
+    CREATE (getronics:Company {name:'Getronics', industry:'Consulting Services', uuid:randomUUID()})
+    CREATE (accenture:Company {name:'Accenture', industry:'Consulting Services', uuid:randomUUID()})
+
+
     CREATE (a)-[:KNOWS {knows_from:'work', text: 'Guillermo and Iria work together in the same project with AI Agents.', uuid:randomUUID()}]->(b)
     CREATE (a)-[:KNOWS {knows_from:'university', text: 'Iria and Gabriela now each other because they went to University together and liked going camping.', uuid:randomUUID() }]->(c)
     CREATE (a)-[:KNOWS {knows_from:'work', text: 'Paula is helping Iria with the project she is working on.', uuid:randomUUID()}]->(d)
     CREATE (a)-[:KNOWS {knows_from:'university', text: 'Cristina was Iria best friend in University, now they see each other every weekend.', uuid:randomUUID()}]->(e)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(g)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(h)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(i)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (a)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
     CREATE (b)-[:KNOWS {knows_from:'work', text: 'Paula is helping Guillermo with the project he is working on.', uuid:randomUUID()}]->(d)
     CREATE (c)-[:KNOWS {knows_from:'university', text: 'Cristina and Gabriela go to Chinese academy together, although they met at uni.', uuid:randomUUID()}]->(e)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(g)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(h)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(i)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (c)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+    CREATE (e)-[:KNOWS {knows_from:'school', text: 'Cristina and Daniel are in a relaitonship.', uuid:randomUUID()}]->(f)
+    CREATE (e)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(g)
+    CREATE (e)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(h)
+    CREATE (e)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(i)
+    CREATE (e)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (e)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+    CREATE (g)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(h)
+    CREATE (g)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(i)
+    CREATE (g)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (g)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+    CREATE (h)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(i)
+    CREATE (h)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (h)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+    CREATE (i)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(j)
+    CREATE (i)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+    CREATE (j)-[:KNOWS {knows_from:'university', text: 'University friends.', uuid:randomUUID()}]->(k)
+
     CREATE (a)-[:WORKS_AT {since:2025}]->(indra)
     CREATE (b)-[:WORKS_AT {since:2023}]->(indra)
     CREATE (c)-[:WORKS_AT {since:2023}]->(ciemat)
     CREATE (d)-[:WORKS_AT {since:2024}]->(indra)
     CREATE (e)-[:WORKS_AT {since:2025}]->(cbm)
+    CREATE (f)-[:WORKS_AT {since:2025}]->(instagram)
+    CREATE (g)-[:WORKS_AT {since:2023}]->(indra)
+    CREATE (h)-[:WORKS_AT {since:2023}]->(getronics)
+    CREATE (i)-[:WORKS_AT {since:2024}]->(accenture)
+    CREATE (j)-[:WORKS_AT {since:2025}]->(accenture)
+    CREATE (k)-[:WORKS_AT {since:2023}]->(indra)
+
     
 show_people : |
     MATCH (p:Person) 
@@ -74,6 +120,25 @@ add_text :
     - |
         MATCH (p:Person {name:"Cristina"})
         SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts. "
+    - |
+        MATCH (p:Person {name:"Daniel"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "." + "Daniel has short curly hair. He loves horror movies. "
+    - |
+        MATCH (p:Person {name:"Javier"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "."
+    - |
+        MATCH (p:Person {name:"Juan"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "."
+    - |
+        MATCH (p:Person {name:"Elias"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "."
+    - |
+        MATCH (p:Person {name:"Iciar"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "."
+    - |
+        MATCH (p:Person {name:"Adrián"})
+        SET p.text = p.name + " is a " + p.gender + " of " + toString(p.age) + " years old and studied " + p.education + "."
+
     
     - |
         MATCH (c:Company {name:"Indra"})
@@ -84,34 +149,75 @@ add_text :
     - |
         MATCH (c:Company {name:"CBM"})
         SET c.text = c.name + " operates in the " + c.industry + " industry." + "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology."
+    - |
+        MATCH (c:Company {name:"Instagram"})
+        SET c.text = c.name + " operates in the " + c.industry + " industry." + "Instagram is a free mobile app for photo and short-form video sharing, owned by Meta, where users can upload media, edit it with filters, add hashtags, and tag locations. The platform allows users to share content with followers, engage with posts through likes and comments, and discover new content through personalized recommendations."
+    - |
+        MATCH (c:Company {name:"Accenture"})
+        SET c.text = c.name + " operates in the " + c.industry + " industry." 
+    - |
+        MATCH (c:Company {name:"Getronics"})
+        SET c.text = c.name + " operates in the " + c.industry + " industry." 
+
 
 add_locations :
 
     - |
         MATCH (p:Person {name:"Iria"})
-        SET p.location = point({latitude: 40.437596, longitude: -3.711223})
+        SET p.location = point({latitude: 40.433600, longitude: -3.711223})
     - |
         MATCH (p:Person {name:"Guillermo"})
         SET p.location = point({latitude: 40.455022, longitude: -3.692355})
     - |
         MATCH (p:Person {name:"Gabriela"})
-        SET p.location = point({latitude: 40.475721, longitude: -3.711451})
+        SET p.location = point({latitude: 40.432800, longitude: -3.711451})
     - |
         MATCH (p:Person {name:"Paula"})
         SET p.location = point({latitude: 40.490170, longitude: -3.654654})
     - |
         MATCH (p:Person {name:"Cristina"})
-        SET p.location = point({latitude: 40.367462, longitude: -3.597745})
+        SET p.location = point({latitude: 40.433200, longitude: -3.597745})
+    - |
+        MATCH (p:Person {name:"Daniel"})
+        SET p.location = point({latitude: 40.433600, longitude: -3.617745})
+    - |
+        MATCH (p:Person {name:"Javier"})
+        SET p.location = point({latitude: 40.434000, longitude: -3.711223})
+
+    - |
+        MATCH (p:Person {name:"Juan"})
+        SET p.location = point({latitude: 40.434400, longitude: -3.711223})
+
+    - |
+        MATCH (p:Person {name:"Elias"})
+        SET p.location = point({latitude: 40.434800, longitude: -3.711223})
+
+    - |
+        MATCH (p:Person {name:"Iciar"})
+        SET p.location = point({latitude: 40.435200, longitude: -3.711223})
+    - |
+        MATCH (p:Person {name:"Adrián"})
+        SET p.location = point({latitude: 40.435600, longitude: -3.711223})
+
     
     - |
         MATCH (c:Company {name:"Indra"})
-        SET c.location = point({latitude: 40.396648, longitude: -3.624635})
+        SET c.location = point({latitude: 40.533873, longitude: -3.630539})
     - |
         MATCH (c:Company {name:"CIEMAT"})
         SET c.location = point({latitude: 40.453938, longitude: -3.728925})
     - |
         MATCH (c:Company {name:"CBM"})
         SET c.location = point({latitude: 40.549613, longitude: -3.690136})
+    - |
+        MATCH (c:Company {name:"Instagram"})
+        SET c.location = point({latitude: 40.652321, longitude: -3.701249})
+    - |
+        MATCH (c:Company {name:"Accenture"})
+        SET c.location = point({latitude: 40.651321, longitude: -3.801249})
+    - |
+        MATCH (c:Company {name:"Getronics"})
+        SET c.location = point({latitude: 40.352321, longitude: -3.801249})
 
 
 create_vector_indexes:

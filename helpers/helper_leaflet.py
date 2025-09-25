@@ -179,7 +179,7 @@ def build_leaflet_html(geojson_str):
 
 
 def create_map_from_rows(rows:list=[]):
-  filename = "neo4j_locations_map_leaflet.html"
+  filename = "data/friends/friends_map_leaflet.html"
   fc = rows_to_geojson(rows) # Convert to GeoJSON (Python dict -> JSON string)
   geojson_str = json.dumps(fc, ensure_ascii=False)
   html_out = build_leaflet_html(geojson_str) # Build Leaflet HTML
