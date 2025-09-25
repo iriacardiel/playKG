@@ -13,5 +13,6 @@ dependencies = [
   "ollama",
   "requests",
   "langchain-community",
-  "langchain-ollama"
+  "langchain-ollama",
+  "folium"
 ]

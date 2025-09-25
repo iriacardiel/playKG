@@ -47,8 +47,10 @@ show_text : |
     RETURN labels(n), n.name, n.text
 
 show_locations : |
-    MATCH (n) 
-    RETURN labels(n), n.name, n.location
+    MATCH (n)
+    RETURN n.name AS name, labels(n) AS labels,
+        n.location.latitude AS lat, 
+        n.location.longitude AS lon
 
 show_distances : |
     MATCH (p:Person {name:"Iria"}), (other:Person)
