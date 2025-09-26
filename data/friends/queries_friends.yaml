@@ -281,12 +281,3 @@ create_person_person_relation: |
     ON CREATE SET r.knows_from = coalesce($knows_from, "unknown"), r.text = $relation_text, r.uuid = randomUUID()
     RETURN p1, r, p2
 
-create_vector_index_nodes : |
-        CREATE VECTOR INDEX $index_name IF NOT EXISTS
-        FOR (n:$node_label) ON (n.embedding)
-        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }
-        
-create_vector_index_relations : |
-        CREATE VECTOR INDEX $index_name IF NOT EXISTS
-        FOR ()-[r:$relation_type]-() ON (n.embedding)
-        OPTIONS { indexConfig: { `vector.dimensions`: 768, `vector.similarity_function`: 'cosine' } }

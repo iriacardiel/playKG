@@ -1,11 +1,10 @@
 import folium
 
-def create_map_from_rows(rows:list=[]):
-    m = folium.Map(location=[40.4168, -3.7038], zoom_start=12)
-    filename= "data/friends/friends_map_folium.html"
+def create_map_from_rows(filename:str="",rows:list=[], center_coordinates:list=[]):
+    m = folium.Map(location=center_coordinates, zoom_start=12)
     for r in rows:
         folium.Marker([r.get("lat",0.0), r.get("lon",0.0)],
-                        popup=f"{r.get("name","")} - {r.get("labels",[])}").add_to(m)
+                        popup=str({k: v for k, v in r.items()})).add_to(m)
     
     m.save(filename)
     print(f"Map saved to {filename}")

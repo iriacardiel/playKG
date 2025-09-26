@@ -3,11 +3,19 @@ Neo4j Vector Operations Module
 """
 
 from typing import Literal, Optional, List, Dict, Any, Union, Callable, Mapping, Iterable
-from neo4j._sync.work.session import Session
 from langchain_neo4j import Neo4jGraph
 from termcolor import cprint
-  
-from . import helper_ollama
+from pprint import pprint
+
+from . import helper_ollama, helper_folium, helper_leaflet
+
+from dotenv import load_dotenv  
+import os
+load_dotenv()  # Load local environment variables
+
+EMB_DIMENSION = os.getenv("EMB_DIMENSION", 768)
+EMB_PROPERTY = os.getenv("EMB_PROPERTY", "embedding")
+EMB_SIMILARITY = os.getenv("EMB_SIMILARITY", "cosine")
 
 def vectorize_property(
     runner: Callable[[str, Optional[Mapping[str, Any]]], Iterable],
@@ -105,6 +113,204 @@ def vectorize_property(
             
             # Debug output
             print(f"  text: {record['txt']}\n  vec: {vec[:3]}")
+
+
+
+def create_vector_index(kg, index_name: str = '',
+                        node_label: Optional[str] = '',
+                        relation_type: Optional[str] = '',
+                        emb_property: Optional[str] = EMB_PROPERTY,
+                        dim: Optional[int] = EMB_DIMENSION,
+                        similarity: Optional[str] = EMB_SIMILARITY):
+    try:
+        if relation_type:
+            # For relationship index
+            query = f"""
+            CREATE VECTOR INDEX {index_name} IF NOT EXISTS
+            FOR ()-[r:{relation_type}]-() ON (r.{emb_property})
+            OPTIONS {{ indexConfig: {{ `vector.dimensions`: {dim}, `vector.similarity_function`: '{similarity}' }} }}
+            """
+        elif node_label:
+            # For node index
+            query = f"""
+            CREATE VECTOR INDEX {index_name} IF NOT EXISTS
+            FOR (n:{node_label}) ON (n.{emb_property})
+            OPTIONS {{ indexConfig: {{ `vector.dimensions`: {dim}, `vector.similarity_function`: '{similarity}' }} }}
+            """
+        else:
+            raise ValueError("Either node_label or relation_type must be provided")
+        
+        kg.query(query)
+        print(f"Successfully created index {index_name}.")
+        
+    except Exception as e:
+        cprint(f"An error occurred {e}.","red")
+
+def show_vector_indexes(kg):
+    # Show created vector indexes
+    results = kg.query("SHOW VECTOR INDEXES")
+    idx = list(results)
+    cprint(f"\nFound {len(idx)} vector index entries.", "green")
+    for r in idx:
+        cprint("-"*20,"green")
+        pprint(r)  
+
+def create_node(
+    *,
+    kg:Neo4jGraph,
+    label: str,
+    props: dict,
+    text_template: str | None = None,   # e.g. "{name} is a {age} of {gender} years old..."
+    text_key: str = "text",
+    location_keys: tuple[str, str] | None = None,  # e.g. ("latitude","longitude") in props
+    uuid_key: str = "uuid",
+    vectorize: bool = True,
+    source_property: str = "text",
+):
+    """
+    Generic node creator:
+      - kg: Neo4J Langchain Graph instance
+      - label: Neo4j label to create (string, validated).
+      - props: dict of properties to set (name, age, gender, education, etc.).
+      - text_template: optional Python format string to compute a 'text' property from props.
+      - text_key: name of the property to store the rendered text in.
+      - location_keys: optional (lat_key, lon_key) in props to turn into point().
+      - uuid_key: property to store UUID; generated in Cypher if missing.
+      - vectorize: whether to call your embedding helper afterward.
+      - source_property: property to vectorize (default "text").
+    """
+    # 1) Compute derived 'text' if requested
+    computed_props = dict(props)  # shallow copy
+    if text_template:
+        try:
+            computed_props[text_key] = text_template.format(**props)
+        except KeyError as e:
+            missing = e.args[0]
+            raise KeyError(f"Missing key {missing!r} required by text_template") from e
+
+    # 2) Pull out location if asked, so we can call point($location) in Cypher
+    location_param = None
+    if location_keys:
+        lat_key, lon_key = location_keys
+        if lat_key in computed_props and lon_key in computed_props:
+            location_param = {
+                "latitude": computed_props.pop(lat_key),
+                "longitude": computed_props.pop(lon_key),
+            }
+
+    # 3) Build Cypher
+    cypher_lines = [
+        f"CREATE (n:{label})",
+        "SET n += $props",
+        f"SET n.{uuid_key} = coalesce(n.{uuid_key}, randomUUID())",
+    ]
+    if location_param is not None:
+        cypher_lines.append("SET n.location = point($location)")
+    cypher_lines.append("RETURN n")
+
+    query = "\n".join(cypher_lines)
+
+    # 4) Params
+    params = {"props": computed_props}
+    if location_param is not None:
+        params["location"] = location_param
+
+    # 5) Execute
+    try:
+        kg.query(query, params)
+        print(f"Successfully created {label}: {computed_props}")
+    except Exception as e:
+        cprint(f"An error occurred {e}.", "red")
+        return
+
+    # 6) Optional vectorization
+    if vectorize:
+        vectorize_property(
+            runner=kg.query,
+            element="node",      # "node"
+            node_label= label,
+            source_property=source_property,
+        )
+        
+    
+    
+def create_relationship(
+    kg:Neo4jGraph,
+    start_label: str,
+    end_label: str,
+    rel_type: str,
+    start_key: str = "name",
+    end_key: str = "name",
+    start_value=None,
+    end_value=None,
+    rel_props: dict | None = None,
+    uuid_key: str = "uuid",
+    vectorize: bool = False,
+    source_property: str = "text",
+):
+    """
+    Generic relationship creator between two matched nodes, idempotent via MERGE.
+    - Matches each node by a single key=val (fast & index-friendly).
+    - Sets any provided rel_props on CREATE (via r += $rel_props) and ensures r.uuid.
+    - Optional embedding/vectorization for relationship text, etc.
+    """
+
+    query_lines = [
+        f"MATCH (a:{start_label} {{{start_key}: $start_value}})",
+        f"MATCH (b:{end_label} {{{end_key}: $end_value}})",
+        f"MERGE (a)-[r:{rel_type}]->(b)",
+        f"ON CREATE SET r.{uuid_key} = coalesce(r.{uuid_key}, randomUUID())",
+    ]
+    if rel_props:
+        query_lines.append("ON CREATE SET r += $rel_props")
+    
+    query_lines.append("RETURN a, r, b")
+
+    params = {
+        "start_value": start_value,
+        "end_value": end_value,
+    }
+    if rel_props:
+        params["rel_props"] = rel_props
+
+    try:
+        kg.query("\n".join(query_lines), params)
+        print(f"Successfully created {rel_type}: {{start: {start_value}, end: {end_value}, rel_props: {rel_props or {}}}}")
+    except Exception as e:
+        cprint(f"An error occurred {e}.", "red")
+        return
+
+    if vectorize:
+        # Generic embedding over relationships
+        vectorize_property(
+            runner=kg.query,
+            element="relationship",
+            rel_type=rel_type,
+            source_property=source_property,
+        )
+        
+        
+def create_visualizations(kg:Neo4jGraph, directory:str=""):
+    # Show locations and plot maps
+    
+    query = """
+    MATCH (n)
+    RETURN 
+    n.name AS name, labels(n) AS labels,
+    n.location.latitude AS lat, 
+    n.location.longitude AS lon
+    """
+    
+    records = kg.query(query) # ["name":"","lat":..,"lon":..,"labels":[".."]},...]
+
+    # Follium map
+    helper_folium.create_map_from_rows(filename=directory+"folium.html",rows=records,center_coordinates=[40.4168, -3.7038])
+    # Leaflet map
+    helper_leaflet.create_map_from_rows(filename=directory+"leaflet.html", rows=records, center_coordinates=[40.4168, -3.7038])
+
+
+
+#########################################################
 
 def create_query_cql(query: str) -> str:
     """

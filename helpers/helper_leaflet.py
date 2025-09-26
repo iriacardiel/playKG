@@ -7,26 +7,15 @@ Neo4j -> Leaflet map (no APOC needed)
 - Writes a standalone Leaflet HTML file: neo4j_locations_map.html
 """
 
-from neo4j import GraphDatabase
 import json
 from pathlib import Path
-import os
-from textwrap import dedent
-from dotenv import load_dotenv  
-
-
-load_dotenv()  # Load local environment variables
 
 
 # -----------------------------
 # 1) CONFIG
 # -----------------------------
-URI = "bolt://localhost:" + os.environ.get("URI_PORT")
-NEO4J_USER = os.environ.get("NEO4J_USER")
-NEO4J_PWD = os.environ.get("NEO4J_PASSWORD")
-NEO4J_DB = os.getenv("NEO4J_DATABASE", "neo4j")    # 👈 choose DB here
+
 # Optional: default map center if fitting bounds fails (e.g., no points)
-DEFAULT_CENTER = (40.4168, -3.7038)  # Madrid
 DEFAULT_ZOOM = 12
 
 def rows_to_geojson(rows):
@@ -57,7 +46,7 @@ def rows_to_geojson(rows):
     }
 
 
-def build_leaflet_html(geojson_str):
+def build_leaflet_html(geojson_str:str="", center_coordinates:list=[]):
     """
     Returns a complete, standalone HTML document string embedding the GeoJSON.
     """
@@ -112,7 +101,7 @@ def build_leaflet_html(geojson_str):
     const data = JSON.parse(geojson);
 
     // Build map
-    const map = L.map('map').setView([{DEFAULT_CENTER[0]}, {DEFAULT_CENTER[1]}], {DEFAULT_ZOOM});
+    const map = L.map('map').setView([{center_coordinates[0]}, {center_coordinates[1]}], {DEFAULT_ZOOM});
 
     // OSM tiles
     L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
@@ -178,10 +167,9 @@ def build_leaflet_html(geojson_str):
     return html_doc
 
 
-def create_map_from_rows(rows:list=[]):
-  filename = "data/friends/friends_map_leaflet.html"
+def create_map_from_rows(filename:str="",rows:list=[], center_coordinates:list=[]):
   fc = rows_to_geojson(rows) # Convert to GeoJSON (Python dict -> JSON string)
   geojson_str = json.dumps(fc, ensure_ascii=False)
-  html_out = build_leaflet_html(geojson_str) # Build Leaflet HTML
+  html_out = build_leaflet_html(geojson_str, center_coordinates) # Build Leaflet HTML
   Path(filename).write_text(html_out, encoding="utf-8")
   print(f"Map saved to {filename}")
