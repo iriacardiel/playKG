@@ -181,3 +181,5 @@ def create_map_from_rows(filename:str="",rows:list=[], center_coordinates:list=[
   
   except Exception as e:
     cprint(f"An error occurred creating the leaflet map: {e}.", "red")
+    
+    return html_out

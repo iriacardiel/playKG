@@ -9,12 +9,25 @@ from termcolor import cprint
 from pprint import pprint
 
 from . import helper_ollama, helper_folium, helper_leaflet
+# -----------------------------------------------------------------------------
+# Config
+# -----------------------------------------------------------------------------
 
 load_dotenv()  # Load local environment variables
+
+URI = "bolt://localhost:" + os.environ.get("URI_PORT")
+NEO4J_USER = os.getenv("NEO4J_USER")
+NEO4J_PWD = os.getenv("NEO4J_PASSWORD")
+NEO4J_DB = os.getenv("NEO4J_DATABASE")
+MODEL_NAME = os.getenv("MODEL_NAME")
 
 EMB_DIMENSION = os.getenv("EMB_DIMENSION", 768)
 EMB_PROPERTY = os.getenv("EMB_PROPERTY", "embedding")
 EMB_SIMILARITY = os.getenv("EMB_SIMILARITY", "cosine")
+
+# Connect
+kg = Neo4jGraph(url=URI, username=NEO4J_USER, password=NEO4J_PWD, database=NEO4J_DB)
+cprint(f"\nConnected to Neo4j database: {NEO4J_DB}", "green")
 
 def reset_graph(kg):
     try:
@@ -330,7 +343,7 @@ def create_relationship(
         )
         
         
-def create_visualizations(kg:Neo4jGraph, directory:str=""):
+def create_visualizations(kg:Neo4jGraph=kg, directory:str=""):
     
     try:
         query = """
@@ -346,11 +359,11 @@ def create_visualizations(kg:Neo4jGraph, directory:str=""):
         cprint(f"An error occurred creating visualizations: {e}.", "red")
 
     # Follium map
-    helper_folium.create_map_from_rows(filename=directory+"folium.html",rows=records,center_coordinates=[40.4168, -3.7038])
+    html_out = helper_folium.create_map_from_rows(filename=directory+"folium.html",rows=records,center_coordinates=[40.4168, -3.7038])
     # Leaflet map
     helper_leaflet.create_map_from_rows(filename=directory+"leaflet.html", rows=records, center_coordinates=[40.4168, -3.7038])
 
-
+    return html_out
 
 #########################################################################################
 
