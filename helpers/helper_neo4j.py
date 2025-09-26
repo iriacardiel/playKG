@@ -1,7 +1,8 @@
 """
 Neo4j Vector Operations Module
 """
-
+import os
+from dotenv import load_dotenv  
 from typing import Literal, Optional, List, Dict, Any, Union, Callable, Mapping, Iterable
 from langchain_neo4j import Neo4jGraph
 from termcolor import cprint
@@ -9,13 +10,29 @@ from pprint import pprint
 
 from . import helper_ollama, helper_folium, helper_leaflet
 
-from dotenv import load_dotenv  
-import os
 load_dotenv()  # Load local environment variables
 
 EMB_DIMENSION = os.getenv("EMB_DIMENSION", 768)
 EMB_PROPERTY = os.getenv("EMB_PROPERTY", "embedding")
 EMB_SIMILARITY = os.getenv("EMB_SIMILARITY", "cosine")
+
+def reset_graph(kg):
+    kg.query("CALL apoc.schema.assert({}, {})")
+    kg.query("MATCH (n) DETACH DELETE n")
+
+def create_constraint(kg:Neo4jGraph, node_label:str="", node_unique_key:str=""):
+    
+    try:
+        
+        constraint_name = node_label.lower() + "_unique"
+        query = f"""
+        CREATE CONSTRAINT {constraint_name} IF NOT EXISTS
+        FOR (p:{node_label}) REQUIRE p.{node_unique_key} IS UNIQUE
+        """
+        kg.query(query)
+    
+    except Exception as e:
+        cprint(f"An error occurred {e}.", "red")
 
 def vectorize_property(
     runner: Callable[[str, Optional[Mapping[str, Any]]], Iterable],
@@ -310,7 +327,7 @@ def create_visualizations(kg:Neo4jGraph, directory:str=""):
 
 
 
-#########################################################
+#########################################################################################
 
 def create_query_cql(query: str) -> str:
     """
