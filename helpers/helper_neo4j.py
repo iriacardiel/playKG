@@ -489,7 +489,7 @@ def neo4j_KGRAG_search(
         "query_embedding": query_embedding
     }
     
-    cprint(f"\nRunning vector search query", "blue")
+    cprint(f"\nRunning vector search query to retrieve context.", "blue")
     raw_results = runner(vector_search_query, search_parameters)
     
     if isinstance(raw_results, list):

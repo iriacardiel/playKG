@@ -115,4 +115,16 @@ The system demonstrates how vector embeddings can enhance traditional graph quer
 
 
 
+# How to use VertexAI
+
+```bash
+sudo snap install google-cloud-cli
+gcloud auth application-default login
+gcloud config set project my-cool-project
+gcloud auth application-default set-quota-project my-cool-project
+```
+
+This will open a login chrome tab (if it doesn't, just click the link that will appear in the logs).
+
+Activate the Vertex API for the project at: https://console.cloud.google.com/
 
