@@ -1,15 +1,12 @@
 """
-Neo4j -> Leaflet map (no APOC needed)
-
-- Connects to Neo4j
+Leaflet Maps Operations Module
 - Reads nodes with `n.location` (point in WGS-84)
 - Generates a GeoJSON FeatureCollection
-- Writes a standalone Leaflet HTML file: neo4j_locations_map.html
+- Writes a standalone Leaflet HTML file
 """
-
 import json
 from pathlib import Path
-
+from termcolor import cprint
 
 # -----------------------------
 # 1) CONFIG
@@ -168,8 +165,19 @@ def build_leaflet_html(geojson_str:str="", center_coordinates:list=[]):
 
 
 def create_map_from_rows(filename:str="",rows:list=[], center_coordinates:list=[]):
-  fc = rows_to_geojson(rows) # Convert to GeoJSON (Python dict -> JSON string)
-  geojson_str = json.dumps(fc, ensure_ascii=False)
-  html_out = build_leaflet_html(geojson_str, center_coordinates) # Build Leaflet HTML
-  Path(filename).write_text(html_out, encoding="utf-8")
-  print(f"Map saved to {filename}")
+  
+  try:
+    
+    # Convert to GeoJSON (Python dict -> JSON string)
+    fc = rows_to_geojson(rows) 
+    geojson_str = json.dumps(fc, ensure_ascii=False)
+    
+    # Build Leaflet HTML
+    html_out = build_leaflet_html(geojson_str, center_coordinates) 
+    
+    # Write HTML to file
+    Path(filename).write_text(html_out, encoding="utf-8")
+    print(f"Map saved to {filename}")
+  
+  except Exception as e:
+    cprint(f"An error occurred creating the leaflet map: {e}.", "red")

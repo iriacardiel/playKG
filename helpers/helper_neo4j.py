@@ -17,8 +17,17 @@ EMB_PROPERTY = os.getenv("EMB_PROPERTY", "embedding")
 EMB_SIMILARITY = os.getenv("EMB_SIMILARITY", "cosine")
 
 def reset_graph(kg):
-    kg.query("CALL apoc.schema.assert({}, {})")
-    kg.query("MATCH (n) DETACH DELETE n")
+    try:
+        kg.query("CALL apoc.schema.assert({}, {})")
+        kg.query("MATCH (n) DETACH DELETE n")
+    except Exception as e:
+        cprint(f"An error occurred restoring graph: {e}.", "red")
+    
+def show_schema(kg):
+    # Refresh and print the LLM-friendly schema summary
+    kg.refresh_schema()
+    print(kg.schema) # readable string: labels, rel-types, properties
+
 
 def create_constraint(kg:Neo4jGraph, node_label:str="", node_unique_key:str=""):
     
@@ -32,7 +41,7 @@ def create_constraint(kg:Neo4jGraph, node_label:str="", node_unique_key:str=""):
         kg.query(query)
     
     except Exception as e:
-        cprint(f"An error occurred {e}.", "red")
+        cprint(f"An error occurred creating constraint: {e}.", "red")
 
 def vectorize_property(
     runner: Callable[[str, Optional[Mapping[str, Any]]], Iterable],
@@ -60,76 +69,90 @@ def vectorize_property(
     """
     
     # Input control
+    try:
+        if node_label and rel_type:
+            raise ValueError("Only one of 'node_label' or 'rel_type' must be provided.")
+        elif element == "node" and not node_label:
+            raise ValueError("Provide 'node_label' for element 'node'.")
+        elif element == "relationship" and not rel_type:
+            raise ValueError("Provide 'rel_type' for element 'relationship'.")
+
+        # Vectorize node property
+        if element == "node":
+
+            cprint(f"\nGenerating embeddings for (n:{node_label}) on n.{source_property}", "green")
+            
+            # Query for nodes without embeddings
+            query = f"""
+                MATCH (n:{node_label})
+                WHERE 
+                    n.{source_property} IS NOT NULL AND 
+                    n.{source_property} <> '' AND 
+                    n.embedding IS NULL
+                RETURN 
+                    n.uuid AS uuid,
+                    n.{source_property} AS txt
+            """
+            
+            records = list(runner(query))
+            
+            # Set embedding property for each record
+            count = 0
+            for record in records:
+                
+                # Create embedding vector
+                vec = helper_ollama.create_embedding(input_text=record["txt"])
+                
+                # Update node with embedding
+                update_query = f"""
+                    MATCH (n:{node_label} {{uuid: $uuid}})
+                    SET n.embedding = $vec
+                """
+                runner(update_query, {"uuid": record["uuid"], "vec": vec})
+                
+                # Debug output
+                count+=1
+                print(f" Updated {count} embeddings")
+
+        # Vectorize relationship property 
+        elif element == "relationship":
+
+            cprint(f"\nGenerating embeddings for [r:{rel_type}] on r.{source_property}", "green")
+            
+            # Query for relationships without embeddings
+            query = f"""
+                MATCH ()-[r:{rel_type}]-()
+                WHERE 
+                    r.{source_property} IS NOT NULL AND 
+                    r.{source_property} <> '' AND 
+                    r.embedding IS NULL
+                RETURN 
+                    r.uuid AS uuid, 
+                    r.{source_property} AS txt
+            """
+            
+            records = list(runner(query))
+            
+            # Set embedding property for each record
+            count = 0
+            for record in records:
+                
+                # Create embedding vector
+                vec = helper_ollama.create_embedding(input_text=record["txt"])
+                
+                # Update relationship with embedding
+                update_query = f"""
+                    MATCH ()-[r:{rel_type} {{uuid: $uuid}}]-()
+                    SET r.embedding = $vec
+                """
+                runner(update_query, {"uuid": record["uuid"], "vec": vec})
+                
+                # Debug output
+                count+=1
+                print(f" Updated {count} embeddings")
     
-    if node_label and rel_type:
-        raise ValueError("Only one of 'node_label' or 'rel_type' must be provided.")
-    elif element == "node" and not node_label:
-        raise ValueError("Provide 'node_label' for element 'node'.")
-    elif element == "relationship" and not rel_type:
-        raise ValueError("Provide 'rel_type' for element 'relationship'.")
-
-    # Vectorize node property
-    if element == "node":
-
-        cprint(f"\nGenerating embeddings for (n:{node_label}) on n.{source_property}", "green")
-        
-        # Query for nodes without embeddings
-        query = f"""
-            MATCH (n:{node_label})
-            WHERE 
-                n.{source_property} IS NOT NULL AND 
-                n.{source_property} <> '' AND 
-                n.embedding IS NULL
-            RETURN 
-                n.uuid AS uuid,
-                n.{source_property} AS txt
-        """
-        
-        records = list(runner(query))
-        
-        # Generate embeddings for each record
-        for record in records:
-            vec = helper_ollama.create_embedding(input_text=record["txt"])
-            
-            # Update node with embedding
-            update_query = f"""
-                MATCH (n:{node_label} {{uuid: $uuid}})
-                SET n.embedding = $vec
-            """
-            runner(update_query, {"uuid": record["uuid"], "vec": vec})
-
-    # Vectorize relationship property 
-    elif element == "relationship":
-
-        cprint(f"\nGenerating embeddings for [r:{rel_type}] on r.{source_property}", "green")
-        
-        # Query for relationships without embeddings
-        query = f"""
-            MATCH ()-[r:{rel_type}]-()
-            WHERE 
-                r.{source_property} IS NOT NULL AND 
-                r.{source_property} <> '' AND 
-                r.embedding IS NULL
-            RETURN 
-                r.uuid AS uuid, 
-                r.{source_property} AS txt
-        """
-        
-        records = list(runner(query))
-        
-        # Generate embeddings for each record
-        for record in records:
-            vec = helper_ollama.create_embedding(input_text=record["txt"])
-            
-            # Update relationship with embedding
-            update_query = f"""
-                MATCH ()-[r:{rel_type} {{uuid: $uuid}}]-()
-                SET r.embedding = $vec
-            """
-            runner(update_query, {"uuid": record["uuid"], "vec": vec})
-            
-            # Debug output
-            print(f"  text: {record['txt']}\n  vec: {vec[:3]}")
+    except Exception as e:
+        cprint(f"An error occurred vectorizing properties {e}.", "red")
 
 
 
@@ -161,7 +184,7 @@ def create_vector_index(kg, index_name: str = '',
         print(f"Successfully created index {index_name}.")
         
     except Exception as e:
-        cprint(f"An error occurred {e}.","red")
+        cprint(f"An error occurred creating vector index {e}.","red")
 
 def show_vector_indexes(kg):
     # Show created vector indexes
@@ -237,7 +260,7 @@ def create_node(
         kg.query(query, params)
         print(f"Successfully created {label}: {computed_props}")
     except Exception as e:
-        cprint(f"An error occurred {e}.", "red")
+        cprint(f"An error occurred creating node: {e}.", "red")
         return
 
     # 6) Optional vectorization
@@ -294,7 +317,7 @@ def create_relationship(
         kg.query("\n".join(query_lines), params)
         print(f"Successfully created {rel_type}: {{start: {start_value}, end: {end_value}, rel_props: {rel_props or {}}}}")
     except Exception as e:
-        cprint(f"An error occurred {e}.", "red")
+        cprint(f"An error occurred creatin relationship: {e}.", "red")
         return
 
     if vectorize:
@@ -308,17 +331,19 @@ def create_relationship(
         
         
 def create_visualizations(kg:Neo4jGraph, directory:str=""):
-    # Show locations and plot maps
     
-    query = """
-    MATCH (n)
-    RETURN 
-    n.name AS name, labels(n) AS labels,
-    n.location.latitude AS lat, 
-    n.location.longitude AS lon
-    """
-    
-    records = kg.query(query) # ["name":"","lat":..,"lon":..,"labels":[".."]},...]
+    try:
+        query = """
+        MATCH (n)
+        RETURN 
+        n.name AS name, labels(n) AS labels,
+        n.location.latitude AS lat, 
+        n.location.longitude AS lon
+        """
+        
+        records = kg.query(query) # ["name":"","lat":..,"lon":..,"labels":[".."]},...]
+    except Exception as e:
+        cprint(f"An error occurred creating visualizations: {e}.", "red")
 
     # Follium map
     helper_folium.create_map_from_rows(filename=directory+"folium.html",rows=records,center_coordinates=[40.4168, -3.7038])
