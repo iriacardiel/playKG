@@ -15,5 +15,6 @@ dependencies = [
   "langchain-community",
   "langchain-ollama",
   "langchain-google-vertexai",
-  "folium"
+  "folium",
+  "gradio"
 ]

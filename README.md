@@ -6,74 +6,10 @@ The project implements the **semantic retrieval** component of a KG RAG pipeline
 
 ![alt text](media/KGRAG_schema.svg)
 
-## Architecture
-
-### Data Model
-- **Entities**: Person and Company nodes with unique constraints
-- **Relationships**: KNOWS (person-to-person) and WORKS_AT (person-to-company)
-- **Properties**: Basic attributes (name, age, education, industry) plus rich text descriptions
-- **Embeddings**: Vector representations of entity descriptions using `nomic-embed-text` model
-
-### Pipeline Components
-
-1. **Graph Setup**
-   - Create constraints for data integrity
-   - Populate sample data (5 people, 3 companies, relationships)
-   - Add descriptive text properties for entities
-
-2. **Vector Index Creation**
-   - Create vector indexes for Person and Company nodes
-   - Use 768-dimensional embeddings with cosine similarity
-   - Index properties: `embedding`
-
-3. **Embedding Generation**
-   - Generate embeddings for entity descriptions using Ollama
-   - Store embeddings as node properties in Neo4j
-   - Only process nodes missing embeddings (incremental updates)
-
-4. **Semantic Search**
-   - Convert user queries to embeddings
-   - Perform vector similarity search against indexed properties
-   - Return ranked results with similarity scores
-
-## Implementation Details
-
-### Technologies Used
-- **Neo4j**: Graph database for storing entities and relationships
-- **Ollama**: Local embedding model (`nomic-embed-text`)
-- **Python Libraries**: 
-  - `neo4j` driver for direct database interaction
-  - `langchain-neo4j` for simplified graph operations
-  - Standard utilities (dotenv, yaml, termcolor)
-
-### Two Implementation Approaches
-1. **Native Neo4j Driver**: Direct database connection with session management
-2. **LangChain Wrapper**: Simplified interface using `Neo4jGraph` class
-
-### Query Examples
-The system can handle semantic queries like:
-- "Who shaved their head?" â†’ Returns Guillermo (highest similarity score)
-- "Curly hair" â†’ Returns Gabriela and other hair-related descriptions
-- Technical/industry terms â†’ Returns relevant company descriptions
-
-## Current Capabilities
-
-**Implemented:**
-- Graph data modeling with constraints
-- Vector embedding generation and storage
-- Vector index creation and management
-- Semantic similarity search
-- Dual implementation approaches (native driver + LangChain)
-
-**Future Extensions:**
-- Query-to-Cypher translation for structured retrieval
-- Information fusion (combining semantic + structured results)
-- LLM response generation
-- Complete end-to-end RAG pipeline
 
 ## Usage
 
-### 1. Start Neo4j:
+### 1. Start Neo4j and NeoDash
 
 ```bash
 docker compose up -d
@@ -88,18 +24,35 @@ pip install uv
 uv sync
 ```
 
+### 3. Run Ollama
+
+```bash
+ollama serve
+ollama pull nomic-embed-text
+```
+
+# Set up Vertex AI API
+
+```bash
+sudo snap install google-cloud-cli
+gcloud auth application-default login
+gcloud config set project my-cool-project
+gcloud auth application-default set-quota-project my-cool-project
+```
+
+This will open a login chrome tab (if it doesn't, just click the link that will appear in the logs).
+
+Activate the Vertex API for the project at: https://console.cloud.google.com/
+
+
 ### 3. Testing the setup
 
-Run Jupyter notebook `neo4j_playground_friends.ipynb`. 
+Run `load_friends.py`. 
+Run `query_friends_graph.py`.
 
-All Cypher queries are stored in `data/friends/queries_friends.yaml` file, and the notebook loads them automatically to execute the following steps:
+![alt text](media/response_example_1.png)
 
-0. Create a graph database different from the default `neo4j` (requires Neo4j Enterprise Edition).
-1. Create constraints to avoid duplicate nodes.
-2. Populate the graph with sample data.
-3. Query the graph to find people and their relationships.
-4. Optionally, clean up the graph.
-
+![alt text](media/response_example_2.png)
 
 **Optional but recommended: Neo4j Desktop**
 
@@ -114,17 +67,4 @@ The system demonstrates how vector embeddings can enhance traditional graph quer
 - [Neo4j Cypher Cheat Sheet](https://neo4j.com/docs/cypher-cheat-sheet/5/all/)
 
 
-
-# How to use VertexAI
-
-```bash
-sudo snap install google-cloud-cli
-gcloud auth application-default login
-gcloud config set project my-cool-project
-gcloud auth application-default set-quota-project my-cool-project
-```
-
-This will open a login chrome tab (if it doesn't, just click the link that will appear in the logs).
-
-Activate the Vertex API for the project at: https://console.cloud.google.com/
 

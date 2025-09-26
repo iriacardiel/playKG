@@ -61,7 +61,10 @@ def RAG_search_QA_examples():
       llm_output = llm.invoke(prompt)
       response = llm_output.content
       cprint(response, "cyan")
-      cprint("#"*60)
+      print("#"*60)
+      print()
+      return response
+
   
     # Query Person Nodes to fetch context
     # ------------------------------------
@@ -72,7 +75,7 @@ def RAG_search_QA_examples():
                                 index = "person_node_idx",
                                 source_property = "text",
                                 main_property = "name",
-                                top_k = 5
+                                top_k = 3
                                 )
     #pprint(result, width = 200, sort_dicts=False, indent=2)
     llm_context = result.get("combined_context", "")
@@ -93,7 +96,7 @@ def RAG_search_QA_examples():
                                     index = "company_node_idx",
                                     source_property = "text",
                                     main_property = "name",
-                                    top_k = 5
+                                    top_k = 3
                                   )
     #pprint(result, width = 200, sort_dicts=False, indent=2)
     llm_context = result.get("combined_context", "")
@@ -180,7 +183,7 @@ def CQL_search_QA_examples():
   
   # Langchain Chain: user query -> LLM -> Generated CQL query -> context -> LLM -> answer
   # -------------------------------------------------------------------------------------
-  cypherChain = GraphCypherQAChain.from_llm(
+  cypher_chain = GraphCypherQAChain.from_llm(
       llm=llm,
       graph=kg,
       verbose=True,
@@ -188,15 +191,18 @@ def CQL_search_QA_examples():
       allow_dangerous_requests = True
       )
 
-  def prettyCypherChain(question: str) -> str:
-      response = cypherChain.invoke(question)
+  def prettyGenAICypherChain(question: str) -> str:
+      cprint(question, "magenta")
+      response = cypher_chain.invoke(question)["result"]
       cprint(response, "cyan")
+      print("#"*60)
+      print()
       
   # Call LLM Chain
   # --------------
-  prettyCypherChain("Who are Iria's friends?")
-  prettyCypherChain("Which people work at Indra but are not friends with Javier? Do not consider that Javier can know himself obiously.")
-  prettyCypherChain("Who is closest to Cristina? Who is furthest? By how much?")
+  prettyGenAICypherChain("Who are Iria's friends?")
+  prettyGenAICypherChain("List people that work at Indra but do not know Paula?")
+  prettyGenAICypherChain("Who is closest to Cristina and by how much distance?")
 
   
 # KG RAG Search
