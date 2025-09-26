@@ -16,6 +16,7 @@ from langchain_neo4j import GraphCypherQAChain
 
 # === Local helpers
 from helpers import helper_neo4j
+import prompts
 
 # -----------------------------------------------------------------------------
 # Config
@@ -40,173 +41,111 @@ llm = ChatVertexAI(
   max_output_tokens=1000,
   location="us-central1",     # or "europe-west1"
 )
+
 cprint(f"\nUsing LLM {MODEL_NAME} through VertexAI API.", "green")
 
 # ----------------------------------------------------
 # Vector Search with predefined queries:
 #  user query -> predefined CQL query -> context -> LLM -> answer
 # ----------------------------------------------------
-def RAG_search_QA_examples():
-  
-    PROMPT_TEMPLATE = """
-    Anser to the query based on the following context retrieved from a Knowledge Graph through Vector Cosine Similarity.
-        
-    Query: `{query}`
-    Context:\n`{llm_context}`
-    """
+def vector_search_QA(
+    query: str,
+    index: str, 
+    source_property : str,
+    main_property : str,
+    top_k: int) -> str:
 
-    def prettyVectorSearchChain(query:str, llm_context:str) -> str:
-      prompt = PROMPT_TEMPLATE.format(query=query, llm_context=llm_context)
-      cprint(prompt, "magenta")
-      llm_output = llm.invoke(prompt)
-      response = llm_output.content
-      cprint(response, "cyan")
-      print("#"*60)
-      print()
-      return response
-
-  
-    # Query Person Nodes to fetch context
-    # ------------------------------------
-    query = "Does any girl have short hair?"
-    result = helper_neo4j.neo4j_KGRAG_search(runner = kg.query,
-                                element = "node",
+    # Query KG 
+    # --------
+    result = helper_neo4j.neo4j_KGRAG_search(
+                                runner = kg.query,
                                 query = query, 
-                                index = "person_node_idx",
-                                source_property = "text",
-                                main_property = "name",
-                                top_k = 3
+                                index = index,
+                                source_property = source_property,
+                                main_property =main_property,
+                                top_k = top_k
                                 )
-    #pprint(result, width = 200, sort_dicts=False, indent=2)
+    
+    # Build prompt
+    # ------------
     llm_context = result.get("combined_context", "")
-    with open("data/friends/friends_context_3.txt", 'w', encoding='utf-8') as f:
-      f.write(llm_context)
+    prompt = prompts.get_prompt("system").format(query=query, llm_context=llm_context)
+    cprint(prompt, "magenta")
     
     # Call LLM
     # --------
-    prettyVectorSearchChain(query, llm_context)
+    llm_output = llm.invoke(prompt)
+    response = llm_output.content
+    cprint(response, "cyan")
+    print("#"*60)
+    print()
+    return response, llm_context
       
-
-    # Query Company Nodes to fetch context
-    # ------------------------------------
-    query = "Which company has more employes belonging to the graph?"
-    result  = helper_neo4j.neo4j_KGRAG_search(runner = kg.query,
-                                    element = "node",
-                                    query = query,
-                                    index = "company_node_idx",
-                                    source_property = "text",
-                                    main_property = "name",
-                                    top_k = 3
-                                  )
-    #pprint(result, width = 200, sort_dicts=False, indent=2)
-    llm_context = result.get("combined_context", "")
-    with open("data/friends/friends_context_2.txt", 'w', encoding='utf-8') as f:
-      f.write(llm_context)
-      
-    # Call LLM
-    # --------
-    prettyVectorSearchChain(query, llm_context)
-      
-      
-    # Query KNOWS Relationships to fetch context
-    # -----------------------------------------
-    query = "Who's Iria's best friend?"
-    result  = helper_neo4j.neo4j_KGRAG_search(runner = kg.query,
-                                  element = "relationship",
-                                  query = query,
-                                  index = "know_relationship_idx",
-                                  source_property = "text",
-                                  main_property = "name",
-                                  top_k = 5
-                                  )
-    #pprint(result, width = 200, sort_dicts=False)
-    llm_context = result.get("combined_context", "")
-    with open("data/friends/friends_context_3.txt", 'w', encoding='utf-8') as f:
-      f.write(llm_context)
-      
-    # Call LLM
-    # --------
-    prettyVectorSearchChain(query, llm_context)
-    
-    
   
 # -----------------------------------------------------------------------------
 # CQL Search with LLM Generated queries
 #  user query -> LLM -> Generated CQL query -> context -> LLM -> answer
 # -----------------------------------------------------------------------------
-def CQL_search_QA_examples():
+def generative_CQL_search_QA(query):
 
-  # Prompt template for the LLM to generate the Cypher Query
-  # --------------------------------------------------------
-  PROMPT_TEMPLATE_CYPHER_GENAI = """Task:Generate Cypher statement to query a graph database.
-  Instructions:
-  Use only the provided relationship types and properties in the schema.
-  Do not use any other relationship types or properties that are not provided.
-  Schema:
-  {schema}
-  Note: Do not include any explanations or apologies in your responses.
-  Do not respond to any questions that might ask anything else than for you to construct a Cypher statement.
-  Do not include any text except the generated Cypher statement.
-  Examples: Here are a few examples of generated Cypher statements for particular questions:
+    # Prompt template for the LLM to generate the Cypher Query
+    # --------------------------------------------------------
+    
+    prompt_cypher_genai = PromptTemplate(
+        input_variables=["schema", "question"], 
+        template=prompts.get_prompt("cypher_genai")
+    )
+    
+  
+    # Langchain Chain: user query -> LLM -> Generated CQL query -> context -> LLM -> answer
+    # -------------------------------------------------------------------------------------
+    cypher_chain = GraphCypherQAChain.from_llm(
+        llm=llm,
+        graph=kg,
+        verbose=True,
+        cypher_prompt=prompt_cypher_genai,
+        allow_dangerous_requests = True,
+        return_intermediate_steps=True,  # needed to grab cypher + rows
+        )
 
-  # Show people
-  MATCH (p:Person) 
-  RETURN p.name as name, p.age as age, p.gender, p.education as education
-  ORDER BY age
-  
-  # Show companies
-  MATCH (c:Company) 
-  RETURN c.name as name, c.industry as industry
-  ORDER BY industry
-  
-  # Show text descriptions of the different nodes
-  MATCH (n) 
-  RETURN labels(n), n.name, n.text
-  
-  # Show distances between people and Iria
-  MATCH (p:Person {{name:"Iria"}}), (other:Person)
-  WITH p, other, point.distance(p.location, other.location) AS distance_m
-  RETURN p.name, other.name, round(distance_m/1000, 2) + " km" AS distance_km
+    cprint(query, "magenta")
+    
+    # Call LLM Chain
+    # --------------
+    out = cypher_chain.invoke(query)
+    response = out.get("result","")
+    steps = out.get("intermediate_steps") or []
+    if steps:
+      cypher = steps[0].get("query") 
+      context = steps[1].get("context")
+    cprint(response, "cyan")
+    print("#"*60)
+    print()
 
-  The question is:
-  {question}"""
-
-
-  prompt = PromptTemplate(
-      input_variables=["schema", "question"], 
-      template=PROMPT_TEMPLATE_CYPHER_GENAI
-  )
-  
-  #helper_neo4j.show_schema(kg)
-  
-  prompt.pretty_print()
-  
-  # Langchain Chain: user query -> LLM -> Generated CQL query -> context -> LLM -> answer
-  # -------------------------------------------------------------------------------------
-  cypher_chain = GraphCypherQAChain.from_llm(
-      llm=llm,
-      graph=kg,
-      verbose=True,
-      cypher_prompt=prompt,
-      allow_dangerous_requests = True
-      )
-
-  def prettyGenAICypherChain(question: str) -> str:
-      cprint(question, "magenta")
-      response = cypher_chain.invoke(question)["result"]
-      cprint(response, "cyan")
-      print("#"*60)
-      print()
-      
-  # Call LLM Chain
-  # --------------
-  prettyGenAICypherChain("Who are Iria's friends?")
-  prettyGenAICypherChain("List people that work at Indra but do not know Paula?")
-  prettyGenAICypherChain("Who is closest to Cristina and by how much distance?")
+    return response, cypher, context
 
   
 # KG RAG Search
 if __name__ == "__main__":
-  RAG_search_QA_examples()
-  CQL_search_QA_examples()
-   
+  
+  vector_search_QA(query = "Does any girl have short hair?", 
+                   index = "person_node_idx", 
+                   source_property = "text", 
+                   main_property = "name", 
+                   top_k = 3)
+  
+  vector_search_QA(query = "Which company has more employes belonging to the graph?", 
+                   index = "company_node_idx", 
+                   source_property = "text",  
+                   main_property = "name", 
+                   top_k = 3)
+  
+  vector_search_QA(query = "Who's Iria's best friend?", 
+                   index = "know_relationship_idx", 
+                   source_property = "text",  
+                   main_property = "name", 
+                   top_k = 3)
+
+  generative_CQL_search_QA(query = "Who are Iria's friends?")
+  generative_CQL_search_QA(query = "List people that work at Indra but do not know Paula?")
+  generative_CQL_search_QA(query = "Who is closest to Cristina and by how much distance?")

@@ -371,7 +371,6 @@ def create_query_cql(query: str) -> str:
     
 def neo4j_KGRAG_search(
     runner: Callable[[str, Optional[Mapping[str, Any]]], Iterable],
-    element: Literal["node", "relationship"],
     query: str,
     index: str, 
     source_property : str,
@@ -399,6 +398,14 @@ def neo4j_KGRAG_search(
         Dictionary containing structured RAG context ready for agent consumption
 
     """
+    
+    if "node" in index:
+        element = "node"
+    elif "relationship" in index:
+        element = "relationship"
+    else:
+        raise ValueError("Index name does not provide enough information about element type.")
+        
     
     # (1) Generate embedding for the search query
     query_embedding = helper_ollama.create_embedding(query)
