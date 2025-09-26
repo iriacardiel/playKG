@@ -6,8 +6,8 @@
       "gender": "female",
       "education": "Physics",
       "extra_text": "Iria has blue eyes and long brunette and wavy hair. She likes to paint her nails in red or purple colours. She usually wears long earrings.",
-      "latitude": 40.4336,
-      "longitude": -3.711223
+      "latitude": 40.45800,
+      "longitude": -3.71158
     },
     {
       "name": "Guillermo",
@@ -15,8 +15,8 @@
       "gender": "male",
       "education": "Industrial Engineering",
       "extra_text": "Guillermo has brown eyes and short hair. He has a very fancy shirt that he takes to all important events. He shaved his head this summer.",
-      "latitude": 40.455022,
-      "longitude": -3.692355
+      "latitude": 40.43200,
+      "longitude": -3.69000
     },
     {
       "name": "Gabriela",
@@ -24,8 +24,8 @@
       "gender": "female",
       "education": "Physics",
       "extra_text": "Gabriela has long curly hair with babylights. She's petite and likes to wear hippie-style clothes.",
-      "latitude": 40.4328,
-      "longitude": -3.711223
+      "latitude": 40.45400,
+      "longitude": -3.71160
     },
     {
       "name": "Paula",
@@ -33,8 +33,8 @@
       "gender": "female",
       "education": "Computer Engineering",
       "extra_text": "Paula short hair in a wolfcut style. She wears long and wide pants and sneakers to the laboratory.",
-      "latitude": 40.49017,
-      "longitude": -3.654654
+      "latitude": 40.43000,
+      "longitude": -3.67000
     },
     {
       "name": "Cristina",
@@ -42,8 +42,8 @@
       "gender": "female",
       "education": "Physics",
       "extra_text": "Cristina has brown eyes and very long straight brunette hair. She usually wears scarfs to style her hair and long skirts.",
-      "latitude": 40.4332,
-      "longitude": -3.617745
+      "latitude": 40.46000,
+      "longitude": -3.615745
     },
     {
       "name": "Daniel",
@@ -51,7 +51,7 @@
       "gender": "male",
       "education": "Arts",
       "extra_text": "Daniel has short curly hair. He loves horror movies.",
-      "latitude": 40.4336,
+      "latitude": 40.46400,
       "longitude": -3.617745
     },
     {
@@ -60,8 +60,8 @@
       "gender": "male",
       "education": "Physics",
       "extra_text": "",
-      "latitude": 40.434,
-      "longitude": -3.711223
+      "latitude": 40.43400,
+      "longitude": -3.71132
     },
     {
       "name": "Juan",
@@ -69,8 +69,8 @@
       "gender": "male",
       "education": "Physics",
       "extra_text": "",
-      "latitude": 40.4344,
-      "longitude": -3.711223
+      "latitude": 40.43800,
+      "longitude": -3.71172
     },
     {
       "name": "Elias",
@@ -78,8 +78,8 @@
       "gender": "male",
       "education": "Physics",
       "extra_text": "",
-      "latitude": 40.4348,
-      "longitude": -3.711223
+      "latitude": 40.44200,
+      "longitude": -3.71179
     },
     {
       "name": "Iciar",
@@ -87,8 +87,8 @@
       "gender": "female",
       "education": "Physics",
       "extra_text": "",
-      "latitude": 40.4352,
-      "longitude": -3.711223
+      "latitude": 40.44600,
+      "longitude": -3.71129
     },
     {
       "name": "Adrián",
@@ -96,8 +96,8 @@
       "gender": "male",
       "education": "Physics",
       "extra_text": "",
-      "latitude": 40.4356,
-      "longitude": -3.711223
+      "latitude": 40.45000,
+      "longitude": -3.71121
     }
   ],
   "companies": [
@@ -112,36 +112,36 @@
       "name": "CIEMAT",
       "industry": "Scientific Research",
       "extra_text": "The CIEMAT (Centro de Investigaciones Energéticas, Medioambientales y Tecnológicas) is a public research organization attached to the Ministry of Science, Innovation and Universities through the General Secretariat for Research. It occupies an intermediate position in the chain that runs from the creation of basic knowledge to industrial application, so its activities always seek to serve as a bridge between R&D&I and objectives of social interest.",
-      "latitude": 40.453938,
+      "latitude": 40.493938,
       "longitude": -3.728925
     },
     {
       "name": "CBM",
       "industry": "Scientific Research",
       "extra_text": "The CBM is a joint research centre, hosting researchers belonging to the Spanish Higher Research Council (CSIC) and the Universidad Autónoma de Madrid (UAM). Founded in 1975, the CBM is one of the largest Spanish multidisciplinary research centres in biomedicine, with expertise in molecular biology, biochemistry, genetics and genomics in several research areas: immunology, virology and microbiology, neuroscience, and cell and developmental biology.",
-      "latitude": 40.549613,
+      "latitude": 40.499613,
       "longitude": -3.690136
     },
     {
       "name": "Instagram",
       "industry": "Social Media",
       "extra_text": "Instagram is a free mobile app for photo and short-form video sharing, owned by Meta, where users can upload media, edit it with filters, add hashtags, and tag locations. The platform allows users to share content with followers, engage with posts through likes and comments, and discover new content through personalized recommendations.",
-      "latitude": 40.652321,
+      "latitude": 40.492321,
       "longitude": -3.701249
     },
     {
       "name": "Getronics",
       "industry": "Consulting Services",
       "extra_text": "",
-      "latitude": 40.352321,
-      "longitude": -3.801249
+      "latitude": 40.492321,
+      "longitude": -3.691249
     },
     {
       "name": "Accenture",
       "industry": "Consulting Services",
       "extra_text": "",
-      "latitude": 40.651321,
-      "longitude": -3.801249
+      "latitude": 40.491321,
+      "longitude": -3.701249
     }
   ],
   "person_person_relations": [
