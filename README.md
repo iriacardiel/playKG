@@ -6,7 +6,7 @@ The project implements the **semantic retrieval** component of a KG RAG pipeline
 
 ![alt text](media/KGRAG_schema.svg)
 
-![asciicast](media/demo_kgrag.mp4)
+![asciicast](media/demo_kgrag_s.mp4)
 
 ## Usage
 
