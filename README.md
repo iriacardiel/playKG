@@ -12,6 +12,8 @@ The core focus is on building a **Knowledge Graph RAG (KG-RAG) pipeline** that e
 
 The system implements two complementary retrieval methods that form the foundation of an intelligent query system:
 
+![Knowledge Graph RAG Schema](media/KGRAG_schema.svg)
+
 ## Retrieval Methods
 
 ### 1. Vector Search (Semantic Retrieval)
