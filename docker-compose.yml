@@ -16,7 +16,7 @@ services:
     container_name: neodash
     restart: unless-stopped
     ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser (e.g. 5005:5005)
+      - "${NEODASH_PORT}:${NEODASH_PORT}"   # Browser (e.g. 5005:5005)
     environment:
       NODE_ENV: production
     depends_on:
