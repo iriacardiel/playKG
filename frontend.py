@@ -1,7 +1,7 @@
 """
 Friends KG — Minimal Gradio UI
 Two inputs + one map. Minimal controls, with send buttons.
-Run: python app_gradio.py
+Run: python frontend.py
 """
 import os, json
 import gradio as gr
@@ -17,7 +17,7 @@ from langchain_google_vertexai import ChatVertexAI
 from langchain.prompts import PromptTemplate
 
 # Local QUERY Functions
-from query_friends_graph import vector_search_QA, generative_CQL_search_QA
+from query_friends import vector_search_QA, generative_CQL_search_QA
 from helpers import helper_neo4j
 
 

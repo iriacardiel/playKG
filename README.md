@@ -106,7 +106,7 @@ Run `query_friends_graph.py`.
 
    - Run:
      ```bash
-     python app_gradio.py
+     python frontend.py
      ```
    - This launches a simple UI for both vector search and Cypher (CQL) GenAI queries over your knowledge graph.
 
@@ -116,7 +116,7 @@ Run `query_friends_graph.py`.
 #### How it Works
 
 - The project demonstrates semantic retrieval on a knowledge graph: you can ask natural language questions, which are translated to graph queries enhanced with vector search over text properties.
-- The Gradio app (`app_gradio.py`) provides two panels:
+- The Gradio app (`frontend.py`) provides two panels:
   - **Vector Search:** Enter a question, select an index, and get semantic matches.
   - **CQL GenAI:** Enter a natural language question to generate and run Cypher graph queries with GenAI assistance.
 
