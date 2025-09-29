@@ -11,11 +11,6 @@ from termcolor import cprint
 from pprint import pprint
 from urllib.parse import quote
 
-# Neo4j / LangChain
-from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
-from langchain_google_vertexai import ChatVertexAI
-from langchain.prompts import PromptTemplate
-
 # Local QUERY Functions
 from query_friends import vector_search_QA, generative_CQL_search_QA
 from helpers import helper_neo4j
