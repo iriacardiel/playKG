@@ -11,6 +11,7 @@ from pprint import pprint
 # === Neo4j / LangChain
 from langchain_neo4j import Neo4jGraph
 from langchain_google_vertexai import ChatVertexAI
+from langchain_ollama import ChatOllama
 from langchain.prompts.prompt import PromptTemplate
 from langchain_neo4j import GraphCypherQAChain
 
@@ -28,6 +29,7 @@ URI = "bolt://localhost:" + os.environ.get("URI_PORT")
 NEO4J_USER = os.getenv("NEO4J_USER")
 NEO4J_PWD = os.getenv("NEO4J_PASSWORD")
 NEO4J_DB = os.getenv("NEO4J_DATABASE")
+MODEL_SERVER = os.getenv("MODEL_SERVER")
 MODEL_NAME = os.getenv("MODEL_NAME")
 
 # Connect
@@ -35,12 +37,25 @@ kg = Neo4jGraph(url=URI, username=NEO4J_USER, password=NEO4J_PWD, database=NEO4J
 cprint(f"\nConnected to Neo4j database: {NEO4J_DB}", "green")
 
 # Initialize the chat model
-llm = ChatVertexAI(
-  model=MODEL_NAME,   # or "gemini-2.5-pro"
-  temperature=0.2,
-  max_output_tokens=1000,
-  location="us-central1",     # or "europe-west1"
-)
+print(f"LLM DETAILS {MODEL_SERVER} | {MODEL_NAME}")
+if MODEL_SERVER == "OLLAMA":
+  llm = ChatOllama(
+        model=MODEL_NAME,
+        temperature=0,
+        num_ctx=16000,
+        n_seq_max=1,
+        extract_reasoning=False,
+    )
+  
+if MODEL_SERVER == "VERTEX":
+  
+  llm = ChatVertexAI(
+    model=MODEL_NAME,   # or "gemini-2.5-pro"
+    temperature=0.2,
+    max_output_tokens=1000,
+    location="us-central1",     # or "europe-west1"
+  )
+  
 
 cprint(f"\nUsing LLM {MODEL_NAME} through VertexAI API.", "green")
 
@@ -147,5 +162,5 @@ if __name__ == "__main__":
                    top_k = 3)
 
   generative_CQL_search_QA(query = "Who are Iria's friends?")
-  generative_CQL_search_QA(query = "List people that work at Indra but do not know Paula?")
-  generative_CQL_search_QA(query = "Who is closest to Cristina and by how much distance?")
+  generative_CQL_search_QA(query = "List people that work at Lumon but do not know Paula?")
+  generative_CQL_search_QA(query = "Who is closest to Marina and by how much distance?")
