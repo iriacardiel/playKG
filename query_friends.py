@@ -41,7 +41,7 @@ print(f"LLM DETAILS {MODEL_SERVER} | {MODEL_NAME}")
 if MODEL_SERVER == "OLLAMA":
   llm = ChatOllama(
         model=MODEL_NAME,
-        temperature=0,
+        temperature=0.2,
         num_ctx=16000,
         n_seq_max=1,
         extract_reasoning=False,

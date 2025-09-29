@@ -38,6 +38,21 @@ ORDER BY industry
 MATCH (n) 
 RETURN labels(n), n.name, n.text
 
+# Show who knows who 
+MATCH (a:Person)-[:KNOWS]-(b:Person)
+WITH a, collect(b.name) AS known_people
+RETURN a.name + " knows " + apoc.text.join(known_people, ", ")
+
+# Show who knows Marta
+MATCH (a:Person {{name:"Marta"}}))-[:KNOWS]-(b:Person)
+WITH a, collect(b.name) AS list_people
+RETURN a.name + " knows " + apoc.text.join(list_people, ", ")
+
+# Show who who works where
+MATCH (a:Person)-[:WORKS_AT]->(b:Company)
+WITH a, collect(b.name) AS list_people
+RETURN a.name + " works at " + apoc.text.join(list_people, ", ")
+
 # Show distances between people and Iria
 MATCH (p:Person {{name:"Iria"}}), (other:Person)
 WITH p, other, point.distance(p.location, other.location) AS distance_m
@@ -47,6 +62,6 @@ The question is:
 {question}"""
   
     else:
-        raise ValueError("Unkown cdu.")
+        raise ValueError("Unknown cdu.")
     
     return prompt
