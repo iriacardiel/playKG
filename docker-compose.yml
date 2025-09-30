@@ -3,8 +3,8 @@ services:
     image: neo4j:5.23-community
     container_name: neo4j
     ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"   # Browser (e.g. 7474:7474)
-      - "${URI_PORT}:${URI_PORT}"     # Bolt (e.g. 7687:7687)
+      - "${NEO4J_HTTP_PORT}:${NEO4J_HTTP_PORT}"   # Browser (e.g. 7474:7474)
+      - "${NEO4J_URI_PORT}:${NEO4J_URI_PORT}"     # Bolt (e.g. 7687:7687)
     environment:
       - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
       - NEO4J_PLUGINS=["apoc"]
@@ -16,7 +16,7 @@ services:
     container_name: neodash
     restart: unless-stopped
     ports:
-      - "${NEODASH_PORT}:${NEODASH_PORT}"   # Browser (e.g. 5005:5005)
+      - "${NEODASH_HTTP_PORT}:${NEODASH_HTTP_PORT}"   # Browser (e.g. 5005:5005)
     environment:
       NODE_ENV: production
     depends_on:

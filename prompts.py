@@ -1,19 +1,15 @@
-"""
-PROMPTS
-"""
+from langchain.prompts import PromptTemplate
 
-def get_prompt(cdu:str="system")->str:
-    if cdu == "system":
-        prompt ="""
+
+SIMPLE_QA_PROMPT_TEMPLATE = """
 Anser to the query based on the following context retrieved from a Knowledge Graph through Vector Cosine Similarity.
     
 Query: `{query}`
 Context:\n`{llm_context}`
 """
 
-    elif cdu == "cypher_genai":
-    
-        prompt = """Task:Generate Cypher statement to query a graph database.
+
+CYPHER_GENERATION_TEMPLATE = """Task:Generate Cypher statement to query a graph database.
 Instructions:
 Use only the provided relationship types and properties in the schema.
 Do not use any other relationship types or properties that are not provided.
@@ -60,8 +56,7 @@ RETURN p.name, other.name, round(distance_m/1000, 2) + " km" AS distance_km
 
 The question is:
 {question}"""
-  
-    else:
-        raise ValueError("Unknown cdu.")
-    
-    return prompt
+
+CYPHER_GENERATION_PROMPT = PromptTemplate(
+    input_variables=["schema", "question"], template=CYPHER_GENERATION_TEMPLATE
+)

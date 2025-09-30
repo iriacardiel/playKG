@@ -3,19 +3,23 @@ Friends KG — Minimal Gradio UI
 Two inputs + one map. Minimal controls, with send buttons.
 Run: python frontend.py
 """
-import os, json
 import gradio as gr
-import folium
-from dotenv import load_dotenv
-from termcolor import cprint
-from pprint import pprint
 from urllib.parse import quote
+from pathlib import Path
 
 # Local QUERY Functions
 from query_friends import vector_search_QA, generative_CQL_search_QA
-from helpers import helper_neo4j
 
 
+# === Local services
+from neo4j_service import Neo4jService
+import prompts
+
+
+Neo4jService.initialize()
+HERE = Path(__file__).parent
+MAP_PATH = "data/friends/friends_map_"
+CHOSEN_MAP = "folium.html" # "leaflet.html"
 
 # ------------------------ Handlers ------------------------
 def handle_vector(v_query, v_index_choice,v_top_k):
@@ -52,13 +56,10 @@ def handle_cql(cql_query):
     return answer, cypher, str(llm_context)
     
 def update_maps():
-    return helper_neo4j.create_visualizations(directory="data/friends/friends_map_")
+    return Neo4jService.create_visualizations(directory=F"{HERE / "data/friends/friends_map_"}")
 
 
-
-MAP_PATH = "data/friends/friends_map_folium.html"
-
-def load_map_iframe(path=MAP_PATH, height=600):
+def load_map_iframe(path=f"{HERE / MAP_PATH / CHOSEN_MAP}", height=600):
     try:
         with open(path, "r", encoding="utf-8") as f:
             html = f.read()
